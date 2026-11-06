@@ -1,0 +1,65 @@
+\documentclass[9pt,letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[margin=1.35cm,top=1.2cm,bottom=1.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2.5pt}
+\titlespacing*{\section}{0pt}{5pt}{2pt}
+\titleformat{\section}{\normalfont\fontsize{10}{11}\bfseries}{\thesection.}{0.4em}{}
+
+\begin{document}
+
+\begin{center}
+    {\Large \textbf{Hito 1: Detección de Fraude en Apertura Digital de Cuentas Bancarias bajo CRISP-ML(Q)}}\\[2pt]
+    {\footnotesize \textbf{Repositorio:} \texttt{fraud-detection-crisp-ml} $|$ \textbf{Ruta C:} Aprendizaje Automático (Russell \& Norvig, caps. 19--21) $|$ \textbf{Semilla:} \texttt{seed=42} $|$ \textbf{Integrantes:} [Nombres del Equipo]}
+\end{center}
+\vspace{-4pt}
+\hrule
+\vspace{3pt}
+
+\section{Problema Real, Contexto Colombiano y Usuario Objetivo}
+La masificación de la banca digital en Colombia ha desplazado el fraude hacia la vinculación no presencial (\textit{onboarding}). Según los \textit{Informes de Operaciones y Quejas} de la \textbf{Superintendencia Financiera de Colombia (SFC, 2024--2025)}, los canales digitales concentran entre el \textbf{82,3\% y el 82,8\% de las operaciones} del sistema financiero y \textbf{más del 85\% de las quejas por fraude}, mientras \textbf{Asobancaria} reporta cerca de \textbf{94 intentos de ciberataque por segundo}, destacando la apertura fraudulenta de productos mediante suplantación e identidades sintéticas (``cuentas mula''). \textbf{Usuario real:} Equipos de Riesgo de Fraude y motores de decisión de bancos y \textit{fintechs} en Colombia, quienes deben interceptar solicitudes fraudulentas en tiempo real minimizando el rechazo injustificado (\textit{falsos positivos}) de ciudadanos legítimos.
+
+\section{Formulación del Agente de IA (PEAS) y Tarea de Aprendizaje}
+\textbf{PEAS:} \textit{Performance:} Maximizar captura de fraude (\texttt{AUC-PR}, \texttt{Recall@FPR$\le$5\%}) acotando fricción (\texttt{FPR}) y disparidad demográfica ($\Delta\text{FPR}$). \textit{Environment:} Canal digital de vinculación bancaria; parcialmente observable, estocástico, dinámico (\textit{concept drift} y adversarios adaptativos) y de costos asimétricos. \textit{Actuators:} Aprobar automáticamente, escalar a verificación biométrica/analista o rechazar solicitud. \textit{Sensors:} Vector $\mathbf{x} \in \mathcal{X}$ con 31 atributos de perfil financiero, contacto, sesión y dispositivo. \textbf{Tarea formal:} Aprendizaje supervisado inductivo de un clasificador probabilístico $\hat{p}_\theta(y=1\mid\mathbf{x})\in[0,1]$ sobre \texttt{fraud\_bool} ($y\in\{0,1\}$), con decisión sensible al costo $\hat{y}=\mathbb{I}[\hat{p}_\theta(y=1\mid\mathbf{x})\ge\tau]$ calibrando $\tau$ en validación.
+
+\section{Fuente de Datos, Licencia y Viabilidad sin \textit{Data Leakage}}
+\textbf{Dataset:} \textit{Bank Account Fraud (BAF) Dataset Suite -- \texttt{Base.csv}} (Jesus et al., \textbf{NeurIPS 2022}, Feedzai), con $1.000.000$ de solicitudes en 8 meses, 32 columnas y prevalencia real de fraude de \textbf{$\approx 1,10\%$} (desbalance $\approx 1\!:\!90$). \textbf{Licencia y privacidad:} \textbf{CC BY-NC-SA 4.0}; sintetizado con preservación de privacidad (\textbf{cero PII sin anonimizar}), con variables interpretables (aptas para análisis causal de $\ge 10$ errores reales) y atributos demográficos explícitos (\texttt{customer\_age}, \texttt{employment\_status}, \texttt{income}) para auditoría de equidad. \textbf{Cómputo gratuito y partición:} Tipado eficiente (\texttt{float32}/\texttt{int32}/\texttt{int8}/\texttt{category}, $\sim 65\%$ menos RAM) y muestra estratificada configurable ($50.000$--$100.000$ registros, \texttt{seed=42}) manteniendo el $1,10\%$ de fraude. Partición estratificada \textbf{70\% Train / 15\% Val / 15\% Test} previa a cualquier ajuste estadístico.
+
+\section{Línea Base y Estrategia de Modelado (Fase 3 CRISP-ML(Q))}
+\textbf{(1) Línea Base:} \texttt{sklearn.pipeline.Pipeline} con conversión de centinelas negativos ($<0 \to \text{NaN}$), imputación por mediana, escalado estándar, \texttt{OneHotEncoder} y \texttt{LogisticRegression(class\_weight="balanced", random\_state=42)}. \textbf{(2) CASH y Desbalance:} Búsqueda con \textbf{FLAML} (\texttt{lgbm}, \texttt{xgboost}, \texttt{rf}, \texttt{extra\_tree}, \texttt{lrl1}; \texttt{metric="ap"}, \texttt{5-fold Stratified CV}, \texttt{seed=42}) gobernada por \texttt{max\_iter} (sin \texttt{time\_budget}) para reproducibilidad exacta. Se comparará \texttt{class\_weight} frente a \textbf{SMOTE} encapsulado en \texttt{imblearn.pipeline.Pipeline} (\textbf{solo dentro de cada fold de entrenamiento}), registrando parámetros, hash \texttt{SHA-256} y \textit{child runs} en \textbf{MLflow}.
+
+\section{Evaluación Predeclarada y Umbral de Éxito (Congelados en Hito 1)}
+\vspace{1pt}
+{\footnotesize
+\begin{tabularx}{\textwidth}{@{}l X X@{}}
+\toprule
+\textbf{Dimensión} & \textbf{Métricas Predeclaradas} & \textbf{Umbral Cuantitativo de Éxito} \\
+\midrule
+\textbf{Primaria (CASH)} & \textbf{AUC-PR (\texttt{ap})} (media $\pm$ DE en 5-fold CV y Test) & Superar el \texttt{AUC-PR} medio CV de la línea base en \textbf{$\ge 15\%$ relativo} (o \textbf{$\ge +0,05$ abs.}). \\
+\textbf{Operativa} & \texttt{Recall@FPR$\le$5\%}, \texttt{F1-score}, \texttt{ROC-AUC}, Matriz de Confusión & Lograr \textbf{$\text{Recall} \ge 0,50$} en Test restringiendo falsos positivos a \textbf{$\text{FPR} \le 5\%$}. \\
+\textbf{IA Responsable} & \texttt{FPR}, \texttt{Recall} y \texttt{AUC-PR} por edad ($\ge 50$ vs. $<50$), empleo e ingreso & Brecha máxima entre grupos etarios \textbf{$\Delta\text{FPR} \le 0,05$} (o mitigación vía umbrales por subgrupo). \\
+\bottomrule
+\end{tabularx}
+}
+
+\section{Referencias Fundacionales}
+{\scriptsize
+[1] S. Russell \& P. Norvig, \textit{Artificial Intelligence: A Modern Approach}, 4th ed., Pearson, 2020 (Caps. 19--21). \quad
+[2] S. Studer et al., ``Towards CRISP-ML(Q),'' \textit{MAKE}, 3(2), 2021. \quad
+[3] S. Jesus et al., ``Turning the Tables: Biased, Imbalanced, Dynamic Tabular Datasets for ML Evaluation,'' \textit{NeurIPS}, 2022. \quad
+[4] T. Saito \& M. Rehmsmeier, ``The Precision-Recall Plot Is More Informative than the ROC Plot...,'' \textit{PLOS ONE}, 10(3), 2015. \quad
+[5] C. Wang et al., ``FLAML: A Fast and Lightweight AutoML Library,'' \textit{MLSys}, 2021. \quad
+[6] Superintendencia Financiera de Colombia (SFC), \textit{Informe de Operaciones y Quejas}, 2025.
+}
+
+\end{document}
