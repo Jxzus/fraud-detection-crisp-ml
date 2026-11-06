@@ -1,0 +1,32 @@
+# Entornos virtuales y caché de Python
+.venv/
+venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Datos crudos y procesados pesados (se conserva data/README.md y manifiestos)
+data/raw/*.csv
+data/raw/*.parquet
+data/raw/*.zip
+data/processed/*.csv
+data/processed/*.parquet
+
+# Artefactos pesados locales de MLflow / modelos binarios grandes
+# Nota: los resúmenes verificables JSON/CSV y configuraciones en experiments/ SÍ se versionan
+experiments/mlruns/
+models/*.pkl
+models/*.joblib
+
+# Notebooks checkpoints e IDE
+.ipynb_checkpoints/
+.vscode/
+.idea/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
