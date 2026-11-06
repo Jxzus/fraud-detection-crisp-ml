@@ -1,0 +1,32 @@
+{
+  "project": "fraud-detection-crisp-ml",
+  "methodology": "CRISP-ML(Q)",
+  "course_track": "Ruta C - Aprendizaje Automatico (Russell & Norvig, Caps. 19-21)",
+  "seed": 42,
+  "dataset": {
+    "name": "Bank Account Fraud (BAF) Dataset Suite - Base.csv",
+    "citation": "Jesus et al., NeurIPS 2022",
+    "license": "CC BY-NC-SA 4.0",
+    "default_stratified_sample_size": 100000,
+    "splits": {
+      "train": 0.70,
+      "val": 0.15,
+      "test": 0.15
+    }
+  },
+  "predeclared_evaluation_hito1": {
+    "frozen_date": "2026-11-05",
+    "primary_metric": "ap",
+    "secondary_metrics": ["f1", "roc_auc", "recall_at_fpr5", "confusion_matrix"],
+    "cv_strategy": "StratifiedKFold(n_splits=5, shuffle=True, random_state=42)",
+    "flaml_estimators": ["lgbm", "xgboost", "rf", "extra_tree", "lrl1"],
+    "flaml_budget_control": "max_iter (deterministic, no time_budget)",
+    "success_criteria": {
+      "min_relative_ap_improvement_over_baseline": 0.15,
+      "min_absolute_ap_improvement_over_baseline": 0.05,
+      "min_test_recall_at_fpr_5pct": 0.50,
+      "max_subgroup_fpr_gap": 0.05
+    },
+    "audited_subgroups": ["customer_age (>=50 vs <50)", "employment_status", "income"]
+  }
+}
