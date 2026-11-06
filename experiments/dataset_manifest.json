@@ -1,0 +1,11 @@
+{
+  "dataset_name": "Bank Account Fraud (BAF) Dataset Suite - Base.csv (NeurIPS 2022)",
+  "authors": "Jesus et al. (Feedzai, NeurIPS 2022)",
+  "license": "CC BY-NC-SA 4.0",
+  "contains_raw_pii": false,
+  "file_path": "data\\raw\\Base.csv",
+  "file_size_bytes": 213427735,
+  "sha256": "7bf10a37ce07e72e14c1b09e5efee3d27261baff4facc7da767b0474dcf9b809",
+  "seed": 42,
+  "verified_at_utc": "2026-11-06T06:53:46.867146+00:00"
+}
