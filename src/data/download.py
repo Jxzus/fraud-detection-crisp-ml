@@ -63,19 +63,70 @@ def _download_via_kagglehub(target_path: Path) -> bool:
         return False
 
 
-def _download_via_https_mirror(target_path: Path, url: str = HF_FALLBACK_BASE_CSV_URL) -> None:
-    """Descarga Base.csv por streaming HTTPS desde espejo académico público sin requerir token."""
+def _download_via_https_mirror(
+    target_path: Path,
+    url: str = HF_FALLBACK_BASE_CSV_URL,
+    max_retries: int = 8,
+) -> None:
+    """Descarga Base.csv por streaming HTTPS con reanudación automática Range ante cortes de red."""
+    import time
+
     import requests
 
     target_path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = target_path.with_suffix(".csv.part")
     print(f"[INFO] Descargando Base.csv por streaming desde espejo público:\n       {url}")
-    with requests.get(url, stream=True, timeout=60) as response:
-        response.raise_for_status()
-        with tmp_path.open("wb") as out_file:
-            for chunk in response.iter_content(chunk_size=1024 * 1024):
-                if chunk:
-                    out_file.write(chunk)
+
+    for attempt in range(1, max_retries + 1):
+        downloaded_bytes = tmp_path.stat().st_size if tmp_path.is_file() else 0
+        headers = {"Range": f"bytes={downloaded_bytes}-"} if downloaded_bytes > 0 else {}
+        try:
+            with requests.get(url, headers=headers, stream=True, timeout=(30, 120)) as response:
+                if downloaded_bytes > 0 and response.status_code == 200:
+                    # El servidor ignoró Range y envió el archivo completo desde cero
+                    downloaded_bytes = 0
+                elif response.status_code == 416:
+                    # Archivo parcial ya alcanzó el tamaño remoto completo
+                    break
+                response.raise_for_status()
+
+                content_len = response.headers.get("Content-Length")
+                total_bytes = (
+                    downloaded_bytes + int(content_len) if content_len is not None else None
+                )
+                mode = "ab" if (downloaded_bytes > 0 and response.status_code == 206) else "wb"
+                last_logged_mb = downloaded_bytes // (25 * 1024 * 1024)
+
+                with tmp_path.open(mode) as out_file:
+                    for chunk in response.iter_content(chunk_size=1024 * 1024):
+                        if chunk:
+                            out_file.write(chunk)
+                            downloaded_bytes += len(chunk)
+                            current_bucket = downloaded_bytes // (25 * 1024 * 1024)
+                            if current_bucket > last_logged_mb:
+                                last_logged_mb = current_bucket
+                                mb_done = downloaded_bytes / (1024 * 1024)
+                                if total_bytes:
+                                    mb_tot = total_bytes / (1024 * 1024)
+                                    pct = 100.0 * downloaded_bytes / total_bytes
+                                    print(
+                                        f"[INFO] Descargado: {mb_done:.1f} / {mb_tot:.1f} MB ({pct:.1f}%)",
+                                        flush=True,
+                                    )
+                                else:
+                                    print(f"[INFO] Descargado: {mb_done:.1f} MB", flush=True)
+                break
+        except requests.RequestException as exc:
+            if attempt == max_retries:
+                raise
+            wait_s = min(15, 2 * attempt)
+            print(
+                f"[WARN] Corte de red en intento {attempt}/{max_retries} ({exc}). "
+                f"Reanudando desde {downloaded_bytes / (1024 * 1024):.1f} MB en {wait_s}s...",
+                flush=True,
+            )
+            time.sleep(wait_s)
+
     tmp_path.replace(target_path)
 
 
