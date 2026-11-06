@@ -1,0 +1,30 @@
+# Dependencias fijadas (pinned versions) para reproducibilidad exacta - Python 3.10 a 3.12
+# Metodología: CRISP-ML(Q) | Ruta C (Aprendizaje Automático) | seed=42
+
+# Núcleo numérico y procesamiento tabular eficiente (float32/int32)
+numpy==2.1.3
+scipy==1.14.1
+pandas==2.2.3
+pyarrow==18.1.0
+joblib==1.4.2
+
+# Modelado supervisado, manejo de desbalance sin data leakage y AutoML (CASH)
+scikit-learn==1.5.2
+imbalanced-learn==0.12.4
+flaml==2.3.3
+lightgbm==4.5.0
+xgboost==2.1.3
+
+# Trazabilidad de experimentos, QA y visualización
+mlflow==2.19.0
+matplotlib==3.9.4
+seaborn==0.13.2
+
+# Descarga reproducible de datos y prototipo interactivo para sustentación
+kagglehub==0.3.6
+requests==2.32.3
+streamlit==1.41.1
+
+# Exportación documental y pruebas automatizadas de integridad
+fpdf2==2.8.2
+pytest==8.3.4
