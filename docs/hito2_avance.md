@@ -1,0 +1,29 @@
+# Hito 2 — Avance de Ingeniería de Datos, EDA y Línea Base Verificada (1 Página)
+**Título:** Detección de Fraude por Suplantación en Apertura Digital de Cuentas Bancarias mediante Aprendizaje Automático Auditable bajo CRISP-ML(Q)  
+**Repositorio:** `fraud-detection-crisp-ml` | **Ruta C:** Aprendizaje Automático (Russell & Norvig, caps. 19–21) | **Semilla:** `seed = 42` | **SHA-256 `Base.csv`:** `7bf10a37...dcf9b809`
+
+---
+
+### 1. Ingeniería de Datos Verificada y Hallazgos del EDA (`notebooks/01_eda_baf.ipynb`)
+- **Ingesta criptográfica y eficiencia en RAM:** Se verificó `data/raw/Base.csv` (*BAF NeurIPS 2022*, `1.000.000` filas × `32` columnas, `213,43 MB`, `0` nulos explícitos, `0` duplicados, licencia `CC BY-NC-SA 4.0`). El tipado compacto (`float32`/`int32`/`int8`/`category`) redujo la huella en RAM de **`458,45 MB` a `84,88 MB` (`-81,49%`)** en el millón de filas y a **`8,49 MB`** en la muestra estratificada oficial (`sample_size = 100.000`, `seed = 42`).
+- **Estratificación y dinámica temporal:** La prevalencia real de fraude (`1,1029%`, razón `1:89,7`) se preservó en la muestra (`1,1030%`, `1.103` fraudes) y en `Train` (`70.000`, `1,1029%`), `Val` (`15.000`, `1,1067%`) y `Test` (`15.000`, `1,1000%`). El EDA evidenció deriva temporal no estacionaria: la tasa de fraude desciende de `1,13%` (`month 0`) a `0,87%` (`month 2`) y asciende hasta **`1,47%` (`month 7`)**.
+- **Auditoría de valores negativos y varianza nula:** Las 6 columnas de `MISSING_NEGATIVE_COLS` concentran ausencias informativas (`intended_balcon_amount` `74,29%`, `prev_address_months_count` `71,12%` con `1,42%` de fraude si `<0` vs. `0,31%` si `>=0`, y `bank_months_count` `25,66%`), justificando `SimpleImputer(strategy="median", add_indicator=True)`. En contraste, `credit_risk_score < 0` (`1,44%`, mín. `-170`) representa puntajes reales válidos (preservados sin imputar) y `device_fraud_count` es constante igual a `0` en el `100%` del dataset (`varianza = 0,0`), eliminándose limpiamente in-fold con `VarianceThreshold(0.0)` (`57` características resultantes). El EDA demográfico anticipó riesgo de sesgo: solicitantes con `customer_age >= 50` (`18,17%` de la muestra) presentan **`2,34%` de fraude basal** frente a **`0,83%`** en `< 50` (`2,83x`).
+
+### 2. Arquitectura Anti-Leakage y Efecto Crítico del Umbral Operativo (`tau_val` vs. `0,50`)
+- **Garantía matemática cero *leakage*:** Todo estadístico (`NegativeSentinelToNaN`, medianas e indicadores de ausencia, filtro de varianza nula, `StandardScaler` y `OneHotEncoder`) se ajusta exclusivamente dentro de cada fold de `X_train` (`sklearn.pipeline.Pipeline`), validado con **8/8 pruebas automatizadas (`pytest -v`)** en `tests/test_pipeline_noleakage.py` y registrado en **MLflow** (`experiments/mlruns`).
+- **Hallazgo crítico sobre `class_weight="balanced"`:** Reponderar la clase minoritaria ($\approx 89,7\times$) desplaza las probabilidades posteriores hacia arriba. Evaluar `Test` con el umbral ingenuo `tau = 0,50` dispara los falsos positivos a **`FPR = 17,84%`** (`2.646` clientes legítimos bloqueados) y hunde `F1 = 0,0851` (`Precision = 4,51%`). Al calibrar **`tau_val = 0,8173`** **exclusivamente en `Val`** sujeto a `FPR <= 5%` (`Val FPR = 4,95%`, `Val Recall = 52,41%`) y aplicarlo sin fuga sobre `Test`, el `FPR` cae a **`4,95%`** (`-72,3%` rechazos erróneos, `FP = 734`) y el `F1` casi se duplica a **`0,1672` (`+96,3%`)**.
+
+### 3. Resultados Reales Verificados de la Línea Base (`experiments/latest_baseline_results.json`)
+
+| Evaluación / Subgrupo (`Test n=15.000`) | `AUC-PR` (`ap`) | `Recall` / `Recall@FPR<=5%` | `FPR` | `F1-score` | `ROC-AUC` / Detalle Operativo |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **5-Fold Stratified CV (`Train n=70.000`)** | **`0,1494 ± 0,0360`** | — | — | `0,0863 ± 0,0022` | `0,8857 ± 0,0070` (`var_ap = 0,0013`) |
+| **Test Global — Umbral ingenuo (`tau = 0,50`)** | `0,1413` | `0,7576` (`TP=125, FN=40`) | `0,1784` (`FP=2.646`) | `0,0851` | `ROC-AUC = 0,8805` (`TN=12.189`, `Prec=0,0451`) |
+| **Test Global — Calibrado en Val (`tau = 0,8173`)** | **`0,1413`** | **`0,4970`** (`TP=82, FN=83`) | **`0,0495`** (`FP=734`) | **`0,1672`** | **`ROC-AUC = 0,8805`** (`TN=14.101`, `Prec=0,1005`) |
+| **Equidad Edad:** `age_<50` (`n=12.211`) vs. `>=50` (`n=2.789`) | `0,1632` / `0,1552` | `0,4182` / `0,6545` | `0,0324` / **`0,1251`** | — | **`Delta FPR = 0,0927`** (`ratio = 0,2590`, excede `0,05`) |
+| **Equidad Empleo (`CA`–`CF`) e Ingreso (`3 bandas`)** | `0,0056–0,5244` | `Empleo CC: 0,7273` | `CC: 0,1444` / `Alta: 0,0723` | — | `Delta FPR empleo = 0,1444` \| `ingreso = 0,0514` |
+
+### 4. Diagnóstico de Brechas frente al Hito 1 y Hoja de Ruta hacia el Hito 3
+1. **Brecha en `AUC-PR` y `Recall@FPR<=5%`:** El `ROC-AUC = 0,8805` confirma buen ordenamiento global, pero bajo desbalance `1:90` el hiperplano lineal de la Regresión Logística solo alcanza `AUC-PR = 0,1494` (CV) / `0,1413` (Test) y `Recall@FPR<=5% = 0,4970` (a **1 verdadero positivo** de la meta `>= 0,50`, `82/165`). Para cumplir el Hito 1, el modelo final deberá alcanzar **`AUC-PR CV >= 0,1719`** (`+15%` relativo) o `>= 0,1994` (`+0,05` abs.).
+2. **Brecha de IA Responsable (`Delta FPR = 0,0927 > 0,05`):** El peso lineal positivo asociado a mayor edad e ingresos provoca `FPR = 12,51%` en `age_>=50` frente a `3,24%` en `age_<50` bajo un único umbral global.
+3. **Plan ejecutable Hito 3 (`--mode full`):** *(i)* Búsqueda **CASH con FLAML** controlada por `max_iter` determinista sobre `lgbm`, `xgboost`, `rf`, `extra_tree` y `lrl1` optimizando `ap` para capturar interacciones no lineales; *(ii)* Comparación controlada `class_weight` vs. **`SMOTE` in-fold** (`imblearn.pipeline.Pipeline`); *(iii)* Calibración de umbrales diferenciados por grupo etario en `Val` para reducir `Delta FPR <= 0,05`; y *(iv)* Análisis causal de **`>= 10` errores reales** (`FP` y `FN` en `Test`).
