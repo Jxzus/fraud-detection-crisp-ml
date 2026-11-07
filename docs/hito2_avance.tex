@@ -1,0 +1,55 @@
+\documentclass[9pt,letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[margin=1.25cm,top=1.05cm,bottom=1.05cm]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2.2pt}
+\titlespacing*{\section}{0pt}{4.5pt}{1.8pt}
+\titleformat{\section}{\normalfont\fontsize{9.8}{10.8}\bfseries}{\thesection.}{0.4em}{}
+
+\begin{document}
+
+\begin{center}
+    {\large \textbf{Hito 2: Ingeniería de Datos, EDA y Línea Base Verificada bajo CRISP-ML(Q)}}\\[1.5pt]
+    {\scriptsize \textbf{Repositorio:} \texttt{fraud-detection-crisp-ml} $|$ \textbf{Ruta C:} Aprendizaje Automático (Russell \& Norvig, caps. 19--21) $|$ \textbf{Semilla:} \texttt{seed=42} $|$ \textbf{SHA-256:} \texttt{7bf10a37...dcf9b809}}
+\end{center}
+\vspace{-5pt}
+\hrule
+\vspace{2.5pt}
+
+\section{Preparación de Datos Verificada y Hallazgos del EDA (\texttt{notebooks/01\_eda\_baf.ipynb})}
+\textbf{Integridad y RAM:} Se descargó y verificó criptográficamente \texttt{Base.csv} (\textit{BAF NeurIPS 2022}, $1.000.000 \times 32$, $213,43\text{ MB}$, licencia \texttt{CC BY-NC-SA 4.0}, cero PII, $0$ \texttt{NaN} literales y $0$ duplicados). El tipado compacto (\texttt{float32}/\texttt{int32}/\texttt{int8}/\texttt{category}) redujo el uso de RAM de \textbf{458,45 MB a 84,88 MB ($-81,49\%$)} en 1M de registros y a \textbf{8,49 MB} en la muestra estratificada determinista ($n=100.000$, \texttt{seed=42}). \textbf{Estratificación y deriva temporal:} La prevalencia global de fraude ($1,1029\%$, razón $1\!:\!89,7$) se conservó en la muestra ($1,1030\%$) y en \texttt{Train} ($70.000$, $1,1029\%$), \texttt{Val} ($15.000$, $1,1067\%$) y \texttt{Test} ($15.000$, $1,1000\%$). El EDA reveló no estacionariedad temporal entre \texttt{month 0} ($1,13\%$), \texttt{month 2} ($0,87\%$) y \texttt{month 7} (\textbf{1,47\%}). \textbf{Centinelas vs.\ dominio y varianza nula:} Las 6 variables de \texttt{MISSING\_NEGATIVE\_COLS} codifican ausencias informativas (\texttt{intended\_balcon\_amount} $74,29\%$; \texttt{prev\_address\_months\_count} $71,12\%$ con $1,42\%$ de fraude si $<0$ vs.\ $0,31\%$ si $\ge 0$; \texttt{bank\_months\_count} $25,66\%$), justificando \texttt{SimpleImputer(strategy="median", add\_indicator=True)}. Se verificó que \texttt{credit\_risk\_score < 0} ($1,44\%$, mín.\ $-170$) corresponde a puntajes reales válidos (preservados sin imputar) y que \texttt{device\_fraud\_count} vale $0$ en el $100\%$ del dataset ($\text{var}=0$), descartándose in-fold mediante \texttt{VarianceThreshold(0.0)} ($57$ columnas transformadas). Además, el segmento \texttt{customer\_age >= 50} ($18,17\%$) exhibe una tasa basal de fraude $2,83\times$ mayor que \texttt{< 50} ($2,34\%$ vs.\ $0,83\%$).
+
+\section{Arquitectura Anti-Leakage y Calibración del Umbral Operativo ($\hat{\tau}_{\text{val}}$ vs.\ $0,50$)}
+El pipeline base (\texttt{sklearn.pipeline.Pipeline} + \texttt{LogisticRegression(class\_weight="balanced", random\_state=42)}) ajusta imputación, filtro de varianza, escalado y \texttt{OneHotEncoder} exclusivamente dentro de cada fold de entrenamiento, verificado matemáticamente con \textbf{8/8 pruebas en \texttt{pytest -v}} (\texttt{tests/test\_pipeline\_noleakage.py}) y trazado en \textbf{MLflow}. \textbf{Hallazgo técnico clave:} La ponderación \texttt{balanced} ($\approx 89,7\times$) infla las probabilidades posteriores $\hat{p}(y=1\mid\mathbf{x})$; aplicar el umbral ingenuo $\tau=0,50$ en \texttt{Test} dispara la fricción a \textbf{$\text{FPR}=17,84\%$} ($2.646$ legítimos bloqueados) con $\text{F1}=0,0851$. Calibrar $\hat{\tau}_{\text{val}}=0,8173$ \textbf{exclusivamente en \texttt{Val}} sujeto a $\text{FPR}\le 5\%$ ($\text{Val FPR}=4,95\%$, $\text{Val Recall}=52,41\%$) reduce el \texttt{FPR} en \texttt{Test} a \textbf{4,95\%} ($-72,3\%$ falsos positivos, $\text{FP}=734$) y eleva el \texttt{F1} en $+96,3\%$ hasta \textbf{0,1672}, evitando además cualquier \textit{threshold snooping} sobre \texttt{Test}.
+
+\section{Resultados Oficiales de la Línea Base (\texttt{experiments/latest\_baseline\_results.json})}
+\vspace{1pt}
+{\scriptsize
+\begin{tabularx}{\textwidth}{@{}l c c c c X@{}}
+\toprule
+\textbf{Evaluación / Subgrupo (\texttt{Test} $n=15.000$)} & \textbf{AUC-PR (\texttt{ap})} & \textbf{Recall} & \textbf{FPR} & \textbf{F1-score} & \textbf{ROC-AUC / Auditoría Operativa y Equidad} \\
+\midrule
+\textbf{5-Fold Stratified CV (\texttt{Train} $n=70.000$)} & $\mathbf{0,1494 \pm 0,0360}$ & --- & --- & $0,0863 \pm 0,0022$ & $\text{ROC-AUC}=0,8857\pm 0,0070$ ($\text{var}_{\text{ap}}=0,00130$) \\
+\textbf{Test Global --- Umbral ingenuo ($\tau=0,50$)} & $0,1413$ & $0,7576$ & $0,1784$ & $0,0851$ & $\text{ROC-AUC}=0,8805$ $|$ $\text{TN}=12.189, \text{FP}=2.646, \text{FN}=40, \text{TP}=125$ \\
+\textbf{Test Global --- Calibrado Val ($\hat{\tau}_{\text{val}}=0,8173$)} & $\mathbf{0,1413}$ & $\mathbf{0,4970}$ & $\mathbf{0,0495}$ & $\mathbf{0,1672}$ & $\mathbf{0,8805}$ $|$ $\text{TN}=14.101, \text{FP}=734, \text{FN}=83, \text{TP}=82$ ($\text{Prec}=10,05\%$) \\
+\midrule
+\textbf{Edad:} \texttt{age\_<50} ($12.211$) vs.\ \texttt{age\_>=50} ($2.789$) & $0,1632$ / $0,1552$ & $0,4182$ / $0,6545$ & $0,0324$ / $\mathbf{0,1251}$ & --- & $\mathbf{\Delta\text{FPR}=0,0927}$ (\textbf{incumple} $\le 0,05$; $\text{ratio}=0,2590$) \\
+\textbf{Empleo (\texttt{CA--CF}) $|$ Ingreso (3 bandas)} & $0,0056\text{--}0,5244$ & \texttt{CC}: $0,7273$ & \texttt{CC}: $0,1444$ & --- & $\Delta\text{FPR}_{\text{empleo}}=0,1444$ $|$ $\Delta\text{FPR}_{\text{ingreso}}=0,0514$ (\texttt{alta}: $0,0723$) \\
+\bottomrule
+\end{tabularx}
+}
+
+\section{Diagnóstico Frente a Metas del Hito 1 y Hoja de Ruta hacia el Hito 3}
+\textbf{(1) Brecha predictiva:} Pese a un $\text{ROC-AUC}=0,8805$ aparentemente alto, bajo desbalance $1\!:\!90$ la frontera lineal solo alcanza $\text{AUC-PR}_{\text{CV}}=0,1494$ ($\text{Test}=0,1413$) y $\text{Recall@FPR}\le 5\% = 0,4970$ (a \textbf{1 verdadero positivo} de la meta $\ge 0,50$, $82/165$). La meta cuantitativa fijada para Hito 3 queda anclada en \textbf{$\text{AUC-PR}_{\text{CV}} \ge 0,1719$} ($+15\%$ rel.) o $\ge 0,1994$ ($+0,05$ abs.). \textbf{(2) Brecha de equidad:} El umbral único penaliza al grupo \texttt{age\_>=50} ($\text{FPR}=12,51\%$ vs.\ $3,24\%$, $\Delta\text{FPR}=0,0927 > 0,05$). \textbf{(3) Hoja de ruta Hito 3 (\texttt{--mode full}):} \textit{(a)} Búsqueda \textbf{CASH en FLAML} controlada por \texttt{max\_iter} determinista sobre \texttt{lgbm}, \texttt{xgboost}, \texttt{rf}, \texttt{extra\_tree} y \texttt{lrl1} optimizando \texttt{ap} con \textit{child runs} en MLflow; \textit{(b)} Comparación controlada \texttt{class\_weight} vs.\ \textbf{\texttt{SMOTE} in-fold} en \texttt{imblearn.pipeline.Pipeline}; \textit{(c)} Ajuste post-procesamiento de umbrales por grupo etario en \texttt{Val} para cumplir $\Delta\text{FPR}\le 0,05$; y \textit{(d)} Auditoría causal de $\ge 10$ casos reales de error (\texttt{FP}/\texttt{FN}) en \texttt{Test}.
+
+\end{document}
