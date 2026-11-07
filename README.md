@@ -48,10 +48,17 @@ fraud-detection-crisp-ml/
 │   └── app/
 │       └── streamlit_app.py      # Prototipo funcional interactivo para sustentación
 ├── notebooks/                    # Exclusivo para análisis exploratorio (EDA)
+│   └── 01_eda_baf.ipynb          # EDA reproducible (desbalance, centinelas, deriva y sesgo)
+├── tests/                        # Pruebas automatizadas de esquema y cero data leakage
+│   ├── test_scaffolding.py       # Integridad estructural, dtypes y configuración seed=42
+│   └── test_pipeline_noleakage.py# Demostración matemática de aislamiento Train/Val/Test y CV
 ├── experiments/                  # Configuraciones seed=42, JSON verificables y MLflow runs
 └── docs/
     ├── hito1_propuesta.md        # Propuesta formal de 1 página (Hito 1)
     ├── hito1_propuesta.tex       # Fuente LaTeX de 1 página para exportar PDF del Hito 1
+    ├── hito2_avance.md           # Avance de 1 página con métricas reales de Línea Base (Hito 2)
+    ├── hito2_avance.tex          # Fuente LaTeX de 1 página del Hito 2
+    ├── fraud_detection_crisp_ml_hito2.pdf # Entregable compilado de 1 página (Hito 2)
     └── bitacora_ia.md            # Bitácora auditable de interacción humano-IA
 ```
 
