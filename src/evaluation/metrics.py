@@ -42,8 +42,14 @@ def compute_classification_metrics(
     y_true: pd.Series | np.ndarray,
     y_prob: np.ndarray,
     threshold: float = 0.5,
+    calibrated_on_val: bool = False,
 ) -> dict[str, Any]:
-    """Calcula AUC-PR (ap), F1-score, ROC-AUC, Recall@FPR<=5% y matriz de confusión."""
+    """Calcula AUC-PR (ap), F1-score, ROC-AUC, Recall@FPR<=5% y matriz de confusión.
+
+    Si `calibrated_on_val=True`, `recall_at_fpr5` y `actual_fpr_at_fpr5` reportan el desempeño
+    estrictamente libre de fuga usando el umbral `threshold` calibrado en validación (`Val`),
+    conservando aparte `roc_curve_recall_at_fpr5` solo como referencia descriptiva de la curva ROC.
+    """
     y_arr = np.asarray(y_true, dtype=np.int8)
     prob_arr = np.asarray(y_prob, dtype=np.float64)
     y_pred = (prob_arr >= threshold).astype(np.int8)
@@ -51,17 +57,25 @@ def compute_classification_metrics(
     tn, fp, fn, tp = confusion_matrix(y_arr, y_pred, labels=[0, 1]).ravel()
     fpr_val = float(fp / (fp + tn)) if (fp + tn) > 0 else 0.0
     recall_val = float(tp / (tp + fn)) if (tp + fn) > 0 else 0.0
+    precision_val = float(tp / (tp + fp)) if (tp + fp) > 0 else 0.0
 
-    _, recall_at_fpr5, actual_fpr5 = threshold_at_max_fpr(y_arr, prob_arr, OPERATIONAL_MAX_FPR)
+    _, roc_recall_at_fpr5, roc_actual_fpr5 = threshold_at_max_fpr(
+        y_arr, prob_arr, OPERATIONAL_MAX_FPR
+    )
+    effective_recall_fpr5 = recall_val if calibrated_on_val else roc_recall_at_fpr5
+    effective_actual_fpr5 = fpr_val if calibrated_on_val else roc_actual_fpr5
 
     return {
         "ap": float(average_precision_score(y_arr, prob_arr)),
         "f1": float(f1_score(y_arr, y_pred, zero_division=0)),
+        "precision": precision_val,
         "roc_auc": float(roc_auc_score(y_arr, prob_arr)) if len(np.unique(y_arr)) > 1 else 0.0,
         "recall": recall_val,
         "fpr": fpr_val,
-        "recall_at_fpr5": recall_at_fpr5,
-        "actual_fpr_at_fpr5": actual_fpr5,
+        "recall_at_fpr5": effective_recall_fpr5,
+        "actual_fpr_at_fpr5": effective_actual_fpr5,
+        "roc_curve_recall_at_fpr5": roc_recall_at_fpr5,
+        "roc_curve_fpr_at_fpr5": roc_actual_fpr5,
         "threshold": float(threshold),
         "confusion_matrix": {"tn": int(tn), "fp": int(fp), "fn": int(fn), "tp": int(tp)},
     }
@@ -125,6 +139,11 @@ def compute_subgroup_fairness(
         report[attr_name] = {
             "groups": groups_summary,
             "max_fpr_gap": round(max(fpr_values) - min(fpr_values), 4) if len(fpr_values) >= 2 else 0.0,
+            "fpr_ratio": (
+                round(min(fpr_values) / max(fpr_values), 4)
+                if len(fpr_values) >= 2 and max(fpr_values) > 0
+                else 0.0
+            ),
             "max_recall_gap": (
                 round(max(recall_values) - min(recall_values), 4) if len(recall_values) >= 2 else 0.0
             ),
