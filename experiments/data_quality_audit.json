@@ -1,0 +1,322 @@
+{
+  "dataset_sha256": "7bf10a37ce07e72e14c1b09e5efee3d27261baff4facc7da767b0474dcf9b809",
+  "seed": 42,
+  "full_dataset_1m": {
+    "rows": 1000000,
+    "cols": 32,
+    "raw_pandas_memory_mb": 458.45,
+    "optimized_memory_mb": 84.88,
+    "ram_reduction_pct": 81.49,
+    "explicit_nan_count": 0,
+    "exact_duplicate_rows": 0,
+    "fraud_count": 11029,
+    "fraud_rate": 0.011029,
+    "fraud_rate_pct": 1.1029,
+    "zero_variance_columns": {
+      "device_fraud_count": {
+        "nunique": 1,
+        "constant_value": 0.0
+      }
+    },
+    "negative_values_audit": {
+      "credit_risk_score": {
+        "negative_count_1m": 14445,
+        "negative_pct_1m": 1.4445,
+        "in_missing_negative_cols": false,
+        "min_value": -170.0,
+        "max_value": 389.0,
+        "sample_negative_values": [
+          -63.0,
+          -44.0,
+          -41.0,
+          -32.0,
+          -23.0,
+          -19.0,
+          -9.0,
+          -7.0,
+          -6.0,
+          -2.0
+        ],
+        "fraud_rate_when_negative": 0.003877,
+        "fraud_rate_when_non_negative": 0.011134
+      },
+      "prev_address_months_count": {
+        "negative_count_1m": 712920,
+        "negative_pct_1m": 71.292,
+        "in_missing_negative_cols": true,
+        "min_value": -1.0,
+        "max_value": 383.0,
+        "sample_negative_values": [
+          -1.0
+        ],
+        "fraud_rate_when_negative": 0.014215,
+        "fraud_rate_when_non_negative": 0.003118
+      },
+      "current_address_months_count": {
+        "negative_count_1m": 4254,
+        "negative_pct_1m": 0.4254,
+        "in_missing_negative_cols": true,
+        "min_value": -1.0,
+        "max_value": 428.0,
+        "sample_negative_values": [
+          -1.0
+        ],
+        "fraud_rate_when_negative": 0.003291,
+        "fraud_rate_when_non_negative": 0.011062
+      },
+      "intended_balcon_amount": {
+        "negative_count_1m": 742523,
+        "negative_pct_1m": 74.2523,
+        "in_missing_negative_cols": true,
+        "min_value": -15.53055477142334,
+        "max_value": 112.95692443847656,
+        "sample_negative_values": [
+          -1.8631006479263306,
+          -1.4903855323791504,
+          -1.3563932180404663,
+          -1.2325562238693237,
+          -1.1011844873428345,
+          -0.9557372331619263,
+          -0.9476592540740967,
+          -0.8495509624481201,
+          -0.669855535030365,
+          -0.5446764826774597
+        ],
+        "fraud_rate_when_negative": 0.013127,
+        "fraud_rate_when_non_negative": 0.004979
+      },
+      "velocity_6h": {
+        "negative_count_1m": 44,
+        "negative_pct_1m": 0.0044,
+        "in_missing_negative_cols": false,
+        "min_value": -170.6030731201172,
+        "max_value": 16715.564453125,
+        "sample_negative_values": [
+          -130.45692443847656,
+          -122.0716781616211,
+          -80.69066619873047,
+          -69.87004852294922,
+          -63.258785247802734,
+          -59.01102828979492,
+          -45.39243698120117,
+          -29.235881805419922,
+          -19.746904373168945,
+          -4.387506484985352
+        ],
+        "fraud_rate_when_negative": 0.0,
+        "fraud_rate_when_non_negative": 0.011029
+      },
+      "bank_months_count": {
+        "negative_count_1m": 253635,
+        "negative_pct_1m": 25.3635,
+        "in_missing_negative_cols": true,
+        "min_value": -1.0,
+        "max_value": 32.0,
+        "sample_negative_values": [
+          -1.0
+        ],
+        "fraud_rate_when_negative": 0.016323,
+        "fraud_rate_when_non_negative": 0.00923
+      },
+      "session_length_in_minutes": {
+        "negative_count_1m": 2015,
+        "negative_pct_1m": 0.2015,
+        "in_missing_negative_cols": true,
+        "min_value": -1.0,
+        "max_value": 85.89913940429688,
+        "sample_negative_values": [
+          -1.0
+        ],
+        "fraud_rate_when_negative": 0.008933,
+        "fraud_rate_when_non_negative": 0.011033
+      },
+      "device_distinct_emails_8w": {
+        "negative_count_1m": 359,
+        "negative_pct_1m": 0.0359,
+        "in_missing_negative_cols": true,
+        "min_value": -1.0,
+        "max_value": 2.0,
+        "sample_negative_values": [
+          -1.0
+        ],
+        "fraud_rate_when_negative": 0.011142,
+        "fraud_rate_when_non_negative": 0.011029
+      }
+    },
+    "month_distribution": {
+      "0": {
+        "rows": 132440,
+        "frauds": 1500,
+        "fraud_rate_pct": 1.1326
+      },
+      "1": {
+        "rows": 127620,
+        "frauds": 1198,
+        "fraud_rate_pct": 0.9387
+      },
+      "2": {
+        "rows": 136979,
+        "frauds": 1198,
+        "fraud_rate_pct": 0.8746
+      },
+      "3": {
+        "rows": 150936,
+        "frauds": 1392,
+        "fraud_rate_pct": 0.9222
+      },
+      "4": {
+        "rows": 127691,
+        "frauds": 1452,
+        "fraud_rate_pct": 1.1371
+      },
+      "5": {
+        "rows": 119323,
+        "frauds": 1411,
+        "fraud_rate_pct": 1.1825
+      },
+      "6": {
+        "rows": 108168,
+        "frauds": 1450,
+        "fraud_rate_pct": 1.3405
+      },
+      "7": {
+        "rows": 96843,
+        "frauds": 1428,
+        "fraud_rate_pct": 1.4746
+      }
+    }
+  },
+  "stratified_sample_100k": {
+    "sample_size": 100000,
+    "optimized_memory_mb": 8.49,
+    "fraud_count": 1103,
+    "fraud_rate": 0.01103,
+    "fraud_rate_pct": 1.103,
+    "device_fraud_count_all_zero": true,
+    "sentinel_negative_pct_100k": {
+      "prev_address_months_count": 71.118,
+      "current_address_months_count": 0.453,
+      "bank_months_count": 25.658,
+      "intended_balcon_amount": 74.288,
+      "session_length_in_minutes": 0.2,
+      "device_distinct_emails_8w": 0.034
+    },
+    "splits": {
+      "train": {
+        "rows": 70000,
+        "positives": 772,
+        "fraud_rate_pct": 1.1029
+      },
+      "val": {
+        "rows": 15000,
+        "positives": 166,
+        "fraud_rate_pct": 1.1067
+      },
+      "test": {
+        "rows": 15000,
+        "positives": 165,
+        "fraud_rate_pct": 1.1
+      }
+    },
+    "month_distribution": {
+      "0": {
+        "rows": 13244,
+        "frauds": 150,
+        "fraud_rate_pct": 1.1326
+      },
+      "1": {
+        "rows": 12762,
+        "frauds": 120,
+        "fraud_rate_pct": 0.9403
+      },
+      "2": {
+        "rows": 13698,
+        "frauds": 120,
+        "fraud_rate_pct": 0.876
+      },
+      "3": {
+        "rows": 15093,
+        "frauds": 139,
+        "fraud_rate_pct": 0.921
+      },
+      "4": {
+        "rows": 12769,
+        "frauds": 145,
+        "fraud_rate_pct": 1.1356
+      },
+      "5": {
+        "rows": 11932,
+        "frauds": 141,
+        "fraud_rate_pct": 1.1817
+      },
+      "6": {
+        "rows": 10817,
+        "frauds": 145,
+        "fraud_rate_pct": 1.3405
+      },
+      "7": {
+        "rows": 9685,
+        "frauds": 143,
+        "fraud_rate_pct": 1.4765
+      }
+    },
+    "subgroups_eda": {
+      "customer_age": {
+        "age_>=50": {
+          "rows": 18170,
+          "pct_population": 18.17,
+          "fraud_rate_pct": 2.3445
+        },
+        "age_<50": {
+          "rows": 81830,
+          "pct_population": 81.83,
+          "fraud_rate_pct": 0.8273
+        }
+      },
+      "employment_status": {
+        "CA": {
+          "rows": 72885,
+          "fraud_rate_pct": 1.1964
+        },
+        "CB": {
+          "rows": 13981,
+          "fraud_rate_pct": 0.8154
+        },
+        "CC": {
+          "rows": 3785,
+          "fraud_rate_pct": 2.5892
+        },
+        "CD": {
+          "rows": 2651,
+          "fraud_rate_pct": 0.3772
+        },
+        "CE": {
+          "rows": 2207,
+          "fraud_rate_pct": 0.1812
+        },
+        "CF": {
+          "rows": 4445,
+          "fraud_rate_pct": 0.1125
+        },
+        "CG": {
+          "rows": 46,
+          "fraud_rate_pct": 0.0
+        }
+      },
+      "income_band": {
+        "low_income": {
+          "rows": 27786,
+          "fraud_rate_pct": 0.6082
+        },
+        "mid_income": {
+          "rows": 24706,
+          "fraud_rate_pct": 0.7974
+        },
+        "high_income": {
+          "rows": 47508,
+          "fraud_rate_pct": 1.5513
+        }
+      }
+    }
+  }
+}
