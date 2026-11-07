@@ -124,6 +124,23 @@ def train_and_track(
         "total_rows_loaded": splits.total_rows_loaded,
         "fraud_rate": round(splits.fraud_rate, 6),
         "memory_usage_mb": splits.memory_usage_mb,
+        "splits_summary": {
+            "train": {
+                "rows": int(len(splits.y_train)),
+                "positives": int(splits.y_train.sum()),
+                "fraud_rate": round(float(splits.y_train.mean()), 6),
+            },
+            "val": {
+                "rows": int(len(splits.y_val)),
+                "positives": int(splits.y_val.sum()),
+                "fraud_rate": round(float(splits.y_val.mean()), 6),
+            },
+            "test": {
+                "rows": int(len(splits.y_test)),
+                "positives": int(splits.y_test.sum()),
+                "fraud_rate": round(float(splits.y_test.mean()), 6),
+            },
+        },
     }
 
     # 1. Línea Base: LogisticRegression(class_weight="balanced") en Pipeline
@@ -136,6 +153,7 @@ def train_and_track(
                 "sample_size": splits.total_rows_loaded,
                 "dataset_sha256": splits.dataset_sha256,
                 "cv_splits": CV_SPLITS,
+                "operational_max_fpr": OPERATIONAL_MAX_FPR,
             }
         )
         baseline_pipe = build_baseline_pipeline(seed=seed)
@@ -144,18 +162,41 @@ def train_and_track(
 
         baseline_pipe.fit(splits.X_train, splits.y_train)
         val_probs = baseline_pipe.predict_proba(splits.X_val)[:, 1]
-        opt_thr, _, _ = threshold_at_max_fpr(splits.y_val.to_numpy(), val_probs, OPERATIONAL_MAX_FPR)
+        opt_thr, val_rec5, val_fpr5 = threshold_at_max_fpr(
+            splits.y_val.to_numpy(), val_probs, OPERATIONAL_MAX_FPR
+        )
 
         test_probs = baseline_pipe.predict_proba(splits.X_test)[:, 1]
-        test_metrics = compute_classification_metrics(splits.y_test, test_probs, threshold=opt_thr)
+        test_naive_metrics = compute_classification_metrics(
+            splits.y_test, test_probs, threshold=0.50, calibrated_on_val=False
+        )
+        test_metrics = compute_classification_metrics(
+            splits.y_test, test_probs, threshold=opt_thr, calibrated_on_val=True
+        )
         subgroup_metrics = compute_subgroup_fairness(
             splits.X_test, splits.y_test, test_probs, threshold=opt_thr
         )
 
-        mlflow.log_metric("test_ap", test_metrics["ap"])
-        mlflow.log_metric("test_f1", test_metrics["f1"])
-        mlflow.log_metric("test_roc_auc", test_metrics["roc_auc"])
-        mlflow.log_metric("test_recall_at_fpr5", test_metrics["recall_at_fpr5"])
+        mlflow.log_metrics(
+            {
+                "val_calibrated_threshold": opt_thr,
+                "val_recall_at_fpr5": val_rec5,
+                "val_fpr_at_fpr5": val_fpr5,
+                "test_naive_thr05_f1": test_naive_metrics["f1"],
+                "test_naive_thr05_precision": test_naive_metrics["precision"],
+                "test_naive_thr05_recall": test_naive_metrics["recall"],
+                "test_naive_thr05_fpr": test_naive_metrics["fpr"],
+                "test_ap": test_metrics["ap"],
+                "test_f1": test_metrics["f1"],
+                "test_precision": test_metrics["precision"],
+                "test_roc_auc": test_metrics["roc_auc"],
+                "test_recall_at_fpr5": test_metrics["recall_at_fpr5"],
+                "test_fpr_at_val_tau": test_metrics["fpr"],
+                "test_age_max_fpr_gap": subgroup_metrics["age_group"]["max_fpr_gap"],
+                "test_employment_max_fpr_gap": subgroup_metrics["employment_status"]["max_fpr_gap"],
+                "test_income_max_fpr_gap": subgroup_metrics["income_band"]["max_fpr_gap"],
+            }
+        )
 
         artifacts_dir = EXPERIMENTS_DIR / "models"
         artifacts_dir.mkdir(parents=True, exist_ok=True)
@@ -163,6 +204,13 @@ def train_and_track(
 
         results["baseline"] = {
             "cv": cv_summary,
+            "val_calibration": {
+                "operational_max_fpr": OPERATIONAL_MAX_FPR,
+                "calibrated_threshold_tau": opt_thr,
+                "val_recall_at_tau": val_rec5,
+                "val_fpr_at_tau": val_fpr5,
+            },
+            "test_naive_threshold_050": test_naive_metrics,
             "test": test_metrics,
             "fairness": subgroup_metrics,
         }
@@ -208,7 +256,7 @@ def train_and_track(
                 replace_negative_sentinels_df(splits.X_test)
             )[:, 1]
             flaml_test = compute_classification_metrics(
-                splits.y_test, test_probs_flaml, threshold=opt_thr_f
+                splits.y_test, test_probs_flaml, threshold=opt_thr_f, calibrated_on_val=True
             )
             flaml_fairness = compute_subgroup_fairness(
                 splits.X_test, splits.y_test, test_probs_flaml, threshold=opt_thr_f
