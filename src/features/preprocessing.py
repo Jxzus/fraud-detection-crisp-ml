@@ -6,10 +6,13 @@ OneHotEncoder) se ajusta EXCLUSIVAMENTE sobre el subconjunto de entrenamiento de
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.compose import ColumnTransformer
+from sklearn.feature_selection import VarianceThreshold
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -43,9 +46,21 @@ class NegativeSentinelToNaN(BaseEstimator, TransformerMixin):
                     df.loc[mask, col] = np.nan
         return df.to_numpy(dtype=np.float32)
 
+    def get_feature_names_out(self, input_features: Any = None) -> np.ndarray:
+        """Retorna nombres de columnas de salida para trazabilidad en ColumnTransformer."""
+        if input_features is not None:
+            return np.asarray(input_features, dtype=object)
+        if getattr(self, "feature_names_in_", None) is not None:
+            return np.asarray(self.feature_names_in_, dtype=object)
+        raise ValueError("No se pudieron determinar los nombres de características de entrada.")
+
 
 def build_preprocessor(include_temporal_col: bool = True) -> ColumnTransformer:
-    """Construye el ColumnTransformer compatible con sklearn e imblearn en precisión float32."""
+    """Construye el ColumnTransformer compatible con sklearn e imblearn en precisión float32.
+
+    Incluye filtro anti-leakage `VarianceThreshold(threshold=0.0)` ajustado exclusivamente en el
+    subconjunto de entrenamiento para descartar atributos constantes (ej. `device_fraud_count == 0`).
+    """
     numeric_features = list(NUMERIC_COLS) + ([TEMPORAL_COL] if include_temporal_col else [])
     categorical_features = list(CATEGORICAL_COLS)
 
@@ -53,6 +68,7 @@ def build_preprocessor(include_temporal_col: bool = True) -> ColumnTransformer:
         steps=[
             ("sentinel_to_nan", NegativeSentinelToNaN()),
             ("imputer", SimpleImputer(strategy="median", add_indicator=True)),
+            ("variance_filter", VarianceThreshold(threshold=0.0)),
             ("scaler", StandardScaler()),
         ]
     )
