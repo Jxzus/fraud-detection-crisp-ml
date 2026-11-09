@@ -243,3 +243,37 @@ def test_threshold_calibrated_exclusively_on_val_without_test_snooping() -> None
     assert m2["threshold"] == tau_a
     assert m1["recall_at_fpr5"] == m1["recall"]
     assert m1["actual_fpr_at_fpr5"] == m1["fpr"]
+
+
+def test_age_group_threshold_mitigation_on_val_without_leakage() -> None:
+    """Verifica que la calibración por grupo etario en Val iguala FPR sin espiar Test."""
+    from src.evaluation.metrics import (
+        calibrate_age_group_thresholds_val,
+        compute_subgroup_fairness,
+        predict_with_age_group_thresholds,
+    )
+
+    rng = np.random.default_rng(SEED)
+    n_val, n_test = 600, 600
+
+    df_val = _make_synthetic_baf_df(n_rows=n_val, seed=SEED)
+    df_test = _make_synthetic_baf_df(n_rows=n_test, seed=SEED + 1)
+
+    y_val = df_val["fraud_bool"].to_numpy(dtype=np.int8)
+    y_test = df_test["fraud_bool"].to_numpy(dtype=np.int8)
+
+    # Simular inflación sistemática de probabilidades en age >= 50
+    is_ge50_val = (df_val["customer_age"].to_numpy() >= 50).astype(np.float64)
+    is_ge50_test = (df_test["customer_age"].to_numpy() >= 50).astype(np.float64)
+
+    val_probs = np.clip(rng.uniform(0.05, 0.65, size=n_val) + 0.22 * is_ge50_val + 0.25 * y_val, 0.0, 0.999)
+    test_probs = np.clip(rng.uniform(0.05, 0.65, size=n_test) + 0.22 * is_ge50_test + 0.25 * y_test, 0.0, 0.999)
+
+    cal_info = calibrate_age_group_thresholds_val(df_val, y_val, val_probs, max_fpr=0.05)
+    assert cal_info["thresholds"]["age_>=50"] > cal_info["thresholds"]["age_<50"]
+
+    mitigated_preds = predict_with_age_group_thresholds(df_test, test_probs, cal_info["thresholds"])
+    fairness_mit = compute_subgroup_fairness(
+        df_test, y_test, test_probs, y_pred_override=mitigated_preds
+    )
+    assert fairness_mit["age_group"]["max_fpr_gap"] <= 0.05
