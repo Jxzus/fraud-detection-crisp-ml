@@ -1,0 +1,1158 @@
+{
+  "seed": 42,
+  "dataset_sha256": "7bf10a37ce07e72e14c1b09e5efee3d27261baff4facc7da767b0474dcf9b809",
+  "total_rows_loaded": 100000,
+  "fraud_rate": 0.01103,
+  "memory_usage_mb": 8.49,
+  "splits_summary": {
+    "train": {
+      "rows": 70000,
+      "positives": 772,
+      "fraud_rate": 0.011029
+    },
+    "val": {
+      "rows": 15000,
+      "positives": 166,
+      "fraud_rate": 0.011067
+    },
+    "test": {
+      "rows": 15000,
+      "positives": 165,
+      "fraud_rate": 0.011
+    }
+  },
+  "baseline": {
+    "cv": {
+      "cv_ap_mean": 0.14944156689775648,
+      "cv_ap_std": 0.03599695960712094,
+      "cv_ap_var": 0.0012957811009566963,
+      "cv_f1_mean": 0.08629520415028755,
+      "cv_f1_std": 0.002163165794595548,
+      "cv_f1_var": 4.679286254908189e-06,
+      "cv_roc_auc_mean": 0.8857215757014654,
+      "cv_roc_auc_std": 0.006953214867499974,
+      "cv_roc_auc_var": 4.8347196993622684e-05
+    },
+    "val_calibration": {
+      "operational_max_fpr": 0.05,
+      "calibrated_threshold_tau": 0.8173369095590141,
+      "val_recall_at_tau": 0.5240963855421686,
+      "val_fpr_at_tau": 0.04954833490629634
+    },
+    "test_naive_threshold_050": {
+      "ap": 0.14132332901665845,
+      "f1": 0.08514986376021798,
+      "precision": 0.04511006856730422,
+      "roc_auc": 0.8804812533831746,
+      "recall": 0.7575757575757576,
+      "fpr": 0.1783619817997978,
+      "recall_at_fpr5": 0.49696969696969695,
+      "actual_fpr_at_fpr5": 0.04920795416245366,
+      "roc_curve_recall_at_fpr5": 0.49696969696969695,
+      "roc_curve_fpr_at_fpr5": 0.04920795416245366,
+      "threshold": 0.5,
+      "confusion_matrix": {
+        "tn": 12189,
+        "fp": 2646,
+        "fn": 40,
+        "tp": 125
+      }
+    },
+    "test": {
+      "ap": 0.14132332901665845,
+      "f1": 0.1671763506625892,
+      "precision": 0.10049019607843138,
+      "roc_auc": 0.8804812533831746,
+      "recall": 0.49696969696969695,
+      "fpr": 0.04947758678800135,
+      "recall_at_fpr5": 0.49696969696969695,
+      "actual_fpr_at_fpr5": 0.04947758678800135,
+      "roc_curve_recall_at_fpr5": 0.49696969696969695,
+      "roc_curve_fpr_at_fpr5": 0.04920795416245366,
+      "threshold": 0.8173369095590141,
+      "confusion_matrix": {
+        "tn": 14101,
+        "fp": 734,
+        "fn": 83,
+        "tp": 82
+      }
+    },
+    "fairness": {
+      "age_group": {
+        "groups": {
+          "age_<50": {
+            "count": 12211,
+            "positives": 110,
+            "ap": 0.1632,
+            "recall": 0.4182,
+            "fpr": 0.0324
+          },
+          "age_>=50": {
+            "count": 2789,
+            "positives": 55,
+            "ap": 0.1552,
+            "recall": 0.6545,
+            "fpr": 0.1251
+          }
+        },
+        "max_fpr_gap": 0.0927,
+        "fpr_ratio": 0.259,
+        "max_recall_gap": 0.2364
+      },
+      "employment_status": {
+        "groups": {
+          "CA": {
+            "count": 11031,
+            "positives": 128,
+            "ap": 0.1435,
+            "recall": 0.5156,
+            "fpr": 0.0538
+          },
+          "CB": {
+            "count": 2061,
+            "positives": 22,
+            "ap": 0.1611,
+            "recall": 0.3182,
+            "fpr": 0.0299
+          },
+          "CC": {
+            "count": 579,
+            "positives": 11,
+            "ap": 0.2435,
+            "recall": 0.7273,
+            "fpr": 0.1444
+          },
+          "CD": {
+            "count": 381,
+            "positives": 1,
+            "ap": 0.0074,
+            "recall": 0.0,
+            "fpr": 0.0053
+          },
+          "CE": {
+            "count": 301,
+            "positives": 2,
+            "ap": 0.5244,
+            "recall": 0.5,
+            "fpr": 0.0
+          },
+          "CF": {
+            "count": 637,
+            "positives": 1,
+            "ap": 0.0056,
+            "recall": 0.0,
+            "fpr": 0.0016
+          }
+        },
+        "max_fpr_gap": 0.1444,
+        "fpr_ratio": 0.0,
+        "max_recall_gap": 0.7273
+      },
+      "income_band": {
+        "groups": {
+          "high_income": {
+            "count": 7099,
+            "positives": 114,
+            "ap": 0.1708,
+            "recall": 0.5877,
+            "fpr": 0.0723
+          },
+          "low_income": {
+            "count": 4196,
+            "positives": 26,
+            "ap": 0.131,
+            "recall": 0.2692,
+            "fpr": 0.0209
+          },
+          "mid_income": {
+            "count": 3705,
+            "positives": 25,
+            "ap": 0.0728,
+            "recall": 0.32,
+            "fpr": 0.0386
+          }
+        },
+        "max_fpr_gap": 0.0514,
+        "fpr_ratio": 0.2886,
+        "max_recall_gap": 0.3185
+      }
+    },
+    "age_fairness_mitigation": {
+      "val_group_calibration": {
+        "max_fpr_constraint": 0.05,
+        "max_val_fpr_gap_constraint": 0.03,
+        "thresholds": {
+          "age_<50": 0.7720481057776605,
+          "age_>=50": 0.8987099659002787
+        },
+        "val_groups": {
+          "age_<50": {
+            "count": 12264,
+            "positives": 104,
+            "calibrated_threshold_tau": 0.772048,
+            "val_recall": 0.5,
+            "val_fpr": 0.0433
+          },
+          "age_>=50": {
+            "count": 2736,
+            "positives": 62,
+            "calibrated_threshold_tau": 0.89871,
+            "val_recall": 0.5484,
+            "val_fpr": 0.0729
+          }
+        }
+      },
+      "test_mitigated": {
+        "ap": 0.14132332901665845,
+        "f1": 0.17118997912317327,
+        "precision": 0.1034047919293821,
+        "roc_auc": 0.8804812533831746,
+        "fpr": 0.047927199191102124,
+        "recall": 0.49696969696969695,
+        "recall_at_fpr5": 0.49696969696969695,
+        "actual_fpr_at_fpr5": 0.047927199191102124,
+        "roc_curve_recall_at_fpr5": 0.49696969696969695,
+        "roc_curve_fpr_at_fpr5": 0.04920795416245366,
+        "group_thresholds": {
+          "age_<50": 0.7720481057776605,
+          "age_>=50": 0.8987099659002787
+        },
+        "confusion_matrix": {
+          "tn": 14124,
+          "fp": 711,
+          "fn": 83,
+          "tp": 82
+        }
+      },
+      "fairness_mitigated": {
+        "age_group": {
+          "groups": {
+            "age_<50": {
+              "count": 12211,
+              "positives": 110,
+              "ap": 0.1632,
+              "recall": 0.4909,
+              "fpr": 0.0432
+            },
+            "age_>=50": {
+              "count": 2789,
+              "positives": 55,
+              "ap": 0.1552,
+              "recall": 0.5091,
+              "fpr": 0.0688
+            }
+          },
+          "max_fpr_gap": 0.0255,
+          "fpr_ratio": 0.6285,
+          "max_recall_gap": 0.0182
+        },
+        "employment_status": {
+          "groups": {
+            "CA": {
+              "count": 11031,
+              "positives": 128,
+              "ap": 0.1435,
+              "recall": 0.5234,
+              "fpr": 0.0547
+            },
+            "CB": {
+              "count": 2061,
+              "positives": 22,
+              "ap": 0.1611,
+              "recall": 0.2727,
+              "fpr": 0.0304
+            },
+            "CC": {
+              "count": 579,
+              "positives": 11,
+              "ap": 0.2435,
+              "recall": 0.7273,
+              "fpr": 0.0827
+            },
+            "CD": {
+              "count": 381,
+              "positives": 1,
+              "ap": 0.0074,
+              "recall": 0.0,
+              "fpr": 0.0079
+            },
+            "CE": {
+              "count": 301,
+              "positives": 2,
+              "ap": 0.5244,
+              "recall": 0.5,
+              "fpr": 0.0
+            },
+            "CF": {
+              "count": 637,
+              "positives": 1,
+              "ap": 0.0056,
+              "recall": 0.0,
+              "fpr": 0.0031
+            }
+          },
+          "max_fpr_gap": 0.0827,
+          "fpr_ratio": 0.0,
+          "max_recall_gap": 0.7273
+        },
+        "income_band": {
+          "groups": {
+            "high_income": {
+              "count": 7099,
+              "positives": 114,
+              "ap": 0.1708,
+              "recall": 0.5614,
+              "fpr": 0.0722
+            },
+            "low_income": {
+              "count": 4196,
+              "positives": 26,
+              "ap": 0.131,
+              "recall": 0.3462,
+              "fpr": 0.0173
+            },
+            "mid_income": {
+              "count": 3705,
+              "positives": 25,
+              "ap": 0.0728,
+              "recall": 0.36,
+              "fpr": 0.0367
+            }
+          },
+          "max_fpr_gap": 0.0549,
+          "fpr_ratio": 0.2393,
+          "max_recall_gap": 0.2152
+        }
+      }
+    }
+  },
+  "logreg_smote_cv": {
+    "cv_ap_mean": 0.15746993775396143,
+    "cv_ap_std": 0.03461611760349445,
+    "cv_ap_var": 0.0011982755979389583,
+    "cv_f1_mean": 0.23689576900430848,
+    "cv_f1_std": 0.025151005758854286,
+    "cv_f1_var": 0.0006325730906819214,
+    "cv_roc_auc_mean": 0.8853086124124593,
+    "cv_roc_auc_std": 0.0032291068726082663,
+    "cv_roc_auc_var": 1.0427131194725938e-05
+  },
+  "logreg_smote_infold": {
+    "cv": {
+      "cv_ap_mean": 0.15746993775396143,
+      "cv_ap_std": 0.03461611760349445,
+      "cv_ap_var": 0.0011982755979389583,
+      "cv_f1_mean": 0.23689576900430848,
+      "cv_f1_std": 0.025151005758854286,
+      "cv_f1_var": 0.0006325730906819214,
+      "cv_roc_auc_mean": 0.8853086124124593,
+      "cv_roc_auc_std": 0.0032291068726082663,
+      "cv_roc_auc_var": 1.0427131194725938e-05
+    },
+    "val_calibration": {
+      "calibrated_threshold_tau": 0.2956214076757889,
+      "val_recall_at_tau": 0.5481927710843374,
+      "val_fpr_at_tau": 0.04961574760684913
+    },
+    "test_naive_threshold_050": {
+      "ap": 0.14210910509945776,
+      "f1": 0.22992700729927007,
+      "precision": 0.16449086161879894,
+      "roc_auc": 0.8847099917271807,
+      "recall": 0.38181818181818183,
+      "fpr": 0.021570610043815303,
+      "recall_at_fpr5": 0.5393939393939394,
+      "actual_fpr_at_fpr5": 0.047522750252780584,
+      "roc_curve_recall_at_fpr5": 0.5393939393939394,
+      "roc_curve_fpr_at_fpr5": 0.047522750252780584,
+      "threshold": 0.5,
+      "confusion_matrix": {
+        "tn": 14515,
+        "fp": 320,
+        "fn": 102,
+        "tp": 63
+      }
+    },
+    "test": {
+      "ap": 0.14210910509945776,
+      "f1": 0.17835671342685372,
+      "precision": 0.10684273709483794,
+      "roc_auc": 0.8847099917271807,
+      "recall": 0.5393939393939394,
+      "fpr": 0.05015166835187058,
+      "recall_at_fpr5": 0.5393939393939394,
+      "actual_fpr_at_fpr5": 0.05015166835187058,
+      "roc_curve_recall_at_fpr5": 0.5393939393939394,
+      "roc_curve_fpr_at_fpr5": 0.047522750252780584,
+      "threshold": 0.2956214076757889,
+      "confusion_matrix": {
+        "tn": 14091,
+        "fp": 744,
+        "fn": 76,
+        "tp": 89
+      }
+    },
+    "fairness": {
+      "age_group": {
+        "groups": {
+          "age_<50": {
+            "count": 12211,
+            "positives": 110,
+            "ap": 0.1544,
+            "recall": 0.4727,
+            "fpr": 0.0352
+          },
+          "age_>=50": {
+            "count": 2789,
+            "positives": 55,
+            "ap": 0.1557,
+            "recall": 0.6727,
+            "fpr": 0.1163
+          }
+        },
+        "max_fpr_gap": 0.0811,
+        "fpr_ratio": 0.3027,
+        "max_recall_gap": 0.2
+      },
+      "employment_status": {
+        "groups": {
+          "CA": {
+            "count": 11031,
+            "positives": 128,
+            "ap": 0.147,
+            "recall": 0.5703,
+            "fpr": 0.0575
+          },
+          "CB": {
+            "count": 2061,
+            "positives": 22,
+            "ap": 0.1524,
+            "recall": 0.3182,
+            "fpr": 0.0255
+          },
+          "CC": {
+            "count": 579,
+            "positives": 11,
+            "ap": 0.2532,
+            "recall": 0.7273,
+            "fpr": 0.1056
+          },
+          "CD": {
+            "count": 381,
+            "positives": 1,
+            "ap": 0.0092,
+            "recall": 0.0,
+            "fpr": 0.0026
+          },
+          "CE": {
+            "count": 301,
+            "positives": 2,
+            "ap": 0.5303,
+            "recall": 0.5,
+            "fpr": 0.0033
+          },
+          "CF": {
+            "count": 637,
+            "positives": 1,
+            "ap": 0.0063,
+            "recall": 0.0,
+            "fpr": 0.0031
+          }
+        },
+        "max_fpr_gap": 0.103,
+        "fpr_ratio": 0.0249,
+        "max_recall_gap": 0.7273
+      },
+      "income_band": {
+        "groups": {
+          "high_income": {
+            "count": 7099,
+            "positives": 114,
+            "ap": 0.1697,
+            "recall": 0.6316,
+            "fpr": 0.0764
+          },
+          "low_income": {
+            "count": 4196,
+            "positives": 26,
+            "ap": 0.1109,
+            "recall": 0.3077,
+            "fpr": 0.0192
+          },
+          "mid_income": {
+            "count": 3705,
+            "positives": 25,
+            "ap": 0.094,
+            "recall": 0.36,
+            "fpr": 0.0353
+          }
+        },
+        "max_fpr_gap": 0.0573,
+        "fpr_ratio": 0.2509,
+        "max_recall_gap": 0.3239
+      }
+    }
+  },
+  "lgbm_smote_infold": {
+    "cv": {
+      "cv_ap_mean": 0.15623692125647404,
+      "cv_ap_std": 0.03150614478958522,
+      "cv_ap_var": 0.000992637159502308,
+      "cv_f1_mean": 0.08759241505279461,
+      "cv_f1_std": 0.031120424396165858,
+      "cv_f1_var": 0.0009684808145974751,
+      "cv_roc_auc_mean": 0.8840311228945049,
+      "cv_roc_auc_std": 0.007736951893337572,
+      "cv_roc_auc_var": 5.9860424599819835e-05
+    },
+    "val_calibration": {
+      "calibrated_threshold_tau": 0.050560094942850124,
+      "val_recall_at_tau": 0.5120481927710844,
+      "val_fpr_at_tau": 0.046784414183632196
+    },
+    "test": {
+      "ap": 0.15366324494420855,
+      "f1": 0.1870967741935484,
+      "precision": 0.11372549019607843,
+      "roc_auc": 0.8902043692741367,
+      "recall": 0.5272727272727272,
+      "fpr": 0.04570273003033367,
+      "recall_at_fpr5": 0.5272727272727272,
+      "actual_fpr_at_fpr5": 0.04570273003033367,
+      "roc_curve_recall_at_fpr5": 0.5333333333333333,
+      "roc_curve_fpr_at_fpr5": 0.04671385237613751,
+      "threshold": 0.050560094942850124,
+      "confusion_matrix": {
+        "tn": 14157,
+        "fp": 678,
+        "fn": 78,
+        "tp": 87
+      }
+    },
+    "fairness": {
+      "age_group": {
+        "groups": {
+          "age_<50": {
+            "count": 12211,
+            "positives": 110,
+            "ap": 0.1414,
+            "recall": 0.4909,
+            "fpr": 0.0325
+          },
+          "age_>=50": {
+            "count": 2789,
+            "positives": 55,
+            "ap": 0.1947,
+            "recall": 0.6,
+            "fpr": 0.1042
+          }
+        },
+        "max_fpr_gap": 0.0718,
+        "fpr_ratio": 0.3115,
+        "max_recall_gap": 0.1091
+      },
+      "employment_status": {
+        "groups": {
+          "CA": {
+            "count": 11031,
+            "positives": 128,
+            "ap": 0.1704,
+            "recall": 0.5547,
+            "fpr": 0.0515
+          },
+          "CB": {
+            "count": 2061,
+            "positives": 22,
+            "ap": 0.1364,
+            "recall": 0.3182,
+            "fpr": 0.026
+          },
+          "CC": {
+            "count": 579,
+            "positives": 11,
+            "ap": 0.1627,
+            "recall": 0.8182,
+            "fpr": 0.0915
+          },
+          "CD": {
+            "count": 381,
+            "positives": 1,
+            "ap": 0.0065,
+            "recall": 0.0,
+            "fpr": 0.0105
+          },
+          "CE": {
+            "count": 301,
+            "positives": 2,
+            "ap": 0.1812,
+            "recall": 0.0,
+            "fpr": 0.0067
+          },
+          "CF": {
+            "count": 637,
+            "positives": 1,
+            "ap": 0.0064,
+            "recall": 0.0,
+            "fpr": 0.0063
+          }
+        },
+        "max_fpr_gap": 0.0853,
+        "fpr_ratio": 0.0687,
+        "max_recall_gap": 0.8182
+      },
+      "income_band": {
+        "groups": {
+          "high_income": {
+            "count": 7099,
+            "positives": 114,
+            "ap": 0.1942,
+            "recall": 0.6228,
+            "fpr": 0.0667
+          },
+          "low_income": {
+            "count": 4196,
+            "positives": 26,
+            "ap": 0.0857,
+            "recall": 0.3462,
+            "fpr": 0.0228
+          },
+          "mid_income": {
+            "count": 3705,
+            "positives": 25,
+            "ap": 0.0799,
+            "recall": 0.28,
+            "fpr": 0.0318
+          }
+        },
+        "max_fpr_gap": 0.0439,
+        "fpr_ratio": 0.3415,
+        "max_recall_gap": 0.3428
+      }
+    }
+  },
+  "flaml_best": {
+    "best_estimator": "lgbm",
+    "best_config": {
+      "n_estimators": 66,
+      "num_leaves": 4,
+      "min_child_samples": 14,
+      "learning_rate": 0.1292426830415275,
+      "log_max_bin": 6,
+      "colsample_bytree": 0.8871559629536413,
+      "reg_alpha": 0.02960826033957992,
+      "reg_lambda": 0.023368135622249268
+    },
+    "best_cv_ap": 0.1797046511916529,
+    "cv": {
+      "cv_ap_mean": 0.1743025139398676,
+      "cv_ap_std": 0.051700538026405084,
+      "cv_ap_var": 0.002672945632219758,
+      "cv_ap_folds": [
+        0.120229,
+        0.198725,
+        0.172139,
+        0.247919,
+        0.1325
+      ],
+      "cv_f1_mean": 0.071875536122308,
+      "cv_f1_std": 0.033323569540541144,
+      "cv_f1_var": 0.0011104602869232813,
+      "cv_roc_auc_mean": 0.886821886050775,
+      "cv_roc_auc_std": 0.0057843915825279485,
+      "cv_roc_auc_var": 3.345918598002018e-05
+    },
+    "estimators_leaderboard": {
+      "lgbm": {
+        "cv_ap_best": 0.1797046511916529,
+        "best_config": {
+          "n_estimators": 66,
+          "num_leaves": 4,
+          "min_child_samples": 14,
+          "learning_rate": 0.1292426830415275,
+          "log_max_bin": 6,
+          "colsample_bytree": 0.8871559629536413,
+          "reg_alpha": 0.02960826033957992,
+          "reg_lambda": 0.023368135622249268
+        }
+      },
+      "xgboost": {
+        "cv_ap_best": 0.09259285942384121,
+        "best_config": {
+          "n_estimators": 4,
+          "max_leaves": 9,
+          "min_child_weight": 0.9999999999999981,
+          "learning_rate": 0.09999999999999995,
+          "subsample": 0.9186551030103914,
+          "colsample_bylevel": 1.0,
+          "colsample_bytree": 0.9480491857726955,
+          "reg_alpha": 0.0009765625,
+          "reg_lambda": 1.0
+        }
+      },
+      "rf": {
+        "cv_ap_best": 0.10131118072018475,
+        "best_config": {
+          "n_estimators": 4,
+          "max_features": 0.18257418583505533,
+          "max_leaves": 7,
+          "criterion": "entropy"
+        }
+      },
+      "extra_tree": {
+        "cv_ap_best": 0.08436965618263659,
+        "best_config": {
+          "n_estimators": 4,
+          "max_features": 0.18257418583505533,
+          "max_leaves": 7,
+          "criterion": "entropy"
+        }
+      },
+      "lrl1": {
+        "cv_ap_best": 0.026063156642437968,
+        "best_config": {
+          "C": 1.7611241081939724
+        }
+      }
+    },
+    "val_calibration": {
+      "operational_max_fpr": 0.05,
+      "calibrated_threshold_tau": 0.03548573251694839,
+      "val_recall_at_tau": 0.5120481927710844,
+      "val_fpr_at_tau": 0.04833490629634623
+    },
+    "test_naive_threshold_050": {
+      "ap": 0.15561018943706093,
+      "f1": 0.07777777777777778,
+      "precision": 0.4666666666666667,
+      "roc_auc": 0.8886670547742339,
+      "recall": 0.04242424242424243,
+      "fpr": 0.0005392652510953826,
+      "recall_at_fpr5": 0.5272727272727272,
+      "actual_fpr_at_fpr5": 0.04914054600606673,
+      "roc_curve_recall_at_fpr5": 0.5272727272727272,
+      "roc_curve_fpr_at_fpr5": 0.04914054600606673,
+      "threshold": 0.5,
+      "confusion_matrix": {
+        "tn": 14827,
+        "fp": 8,
+        "fn": 158,
+        "tp": 7
+      }
+    },
+    "test": {
+      "ap": 0.15561018943706093,
+      "f1": 0.17611336032388664,
+      "precision": 0.10571081409477522,
+      "roc_auc": 0.8886670547742339,
+      "recall": 0.5272727272727272,
+      "fpr": 0.04961240310077519,
+      "recall_at_fpr5": 0.5272727272727272,
+      "actual_fpr_at_fpr5": 0.04961240310077519,
+      "roc_curve_recall_at_fpr5": 0.5272727272727272,
+      "roc_curve_fpr_at_fpr5": 0.04914054600606673,
+      "threshold": 0.03548573251694839,
+      "confusion_matrix": {
+        "tn": 14099,
+        "fp": 736,
+        "fn": 78,
+        "tp": 87
+      }
+    },
+    "fairness": {
+      "age_group": {
+        "groups": {
+          "age_<50": {
+            "count": 12211,
+            "positives": 110,
+            "ap": 0.1506,
+            "recall": 0.4818,
+            "fpr": 0.0351
+          },
+          "age_>=50": {
+            "count": 2789,
+            "positives": 55,
+            "ap": 0.1899,
+            "recall": 0.6182,
+            "fpr": 0.1138
+          }
+        },
+        "max_fpr_gap": 0.0786,
+        "fpr_ratio": 0.3087,
+        "max_recall_gap": 0.1364
+      },
+      "employment_status": {
+        "groups": {
+          "CA": {
+            "count": 11031,
+            "positives": 128,
+            "ap": 0.1798,
+            "recall": 0.5547,
+            "fpr": 0.054
+          },
+          "CB": {
+            "count": 2061,
+            "positives": 22,
+            "ap": 0.1617,
+            "recall": 0.3636,
+            "fpr": 0.0353
+          },
+          "CC": {
+            "count": 579,
+            "positives": 11,
+            "ap": 0.1835,
+            "recall": 0.7273,
+            "fpr": 0.1092
+          },
+          "CD": {
+            "count": 381,
+            "positives": 1,
+            "ap": 0.0074,
+            "recall": 0.0,
+            "fpr": 0.0132
+          },
+          "CE": {
+            "count": 301,
+            "positives": 2,
+            "ap": 0.0978,
+            "recall": 0.0,
+            "fpr": 0.0033
+          },
+          "CF": {
+            "count": 637,
+            "positives": 1,
+            "ap": 0.0047,
+            "recall": 0.0,
+            "fpr": 0.0094
+          }
+        },
+        "max_fpr_gap": 0.1058,
+        "fpr_ratio": 0.0306,
+        "max_recall_gap": 0.7273
+      },
+      "income_band": {
+        "groups": {
+          "high_income": {
+            "count": 7099,
+            "positives": 114,
+            "ap": 0.1925,
+            "recall": 0.6053,
+            "fpr": 0.0723
+          },
+          "low_income": {
+            "count": 4196,
+            "positives": 26,
+            "ap": 0.1396,
+            "recall": 0.4231,
+            "fpr": 0.0242
+          },
+          "mid_income": {
+            "count": 3705,
+            "positives": 25,
+            "ap": 0.0477,
+            "recall": 0.28,
+            "fpr": 0.0353
+          }
+        },
+        "max_fpr_gap": 0.0481,
+        "fpr_ratio": 0.335,
+        "max_recall_gap": 0.3253
+      }
+    },
+    "age_fairness_mitigation": {
+      "val_group_calibration": {
+        "max_fpr_constraint": 0.05,
+        "max_val_fpr_gap_constraint": 0.03,
+        "thresholds": {
+          "age_<50": 0.027326925732615432,
+          "age_>=50": 0.06631699992146221
+        },
+        "val_groups": {
+          "age_<50": {
+            "count": 12264,
+            "positives": 104,
+            "calibrated_threshold_tau": 0.027327,
+            "val_recall": 0.5,
+            "val_fpr": 0.0447
+          },
+          "age_>=50": {
+            "count": 2736,
+            "positives": 62,
+            "calibrated_threshold_tau": 0.066317,
+            "val_recall": 0.5161,
+            "val_fpr": 0.0636
+          }
+        }
+      },
+      "test_mitigated": {
+        "ap": 0.15561018943706093,
+        "f1": 0.17382198952879582,
+        "precision": 0.10506329113924051,
+        "roc_auc": 0.8886670547742339,
+        "fpr": 0.047657566565554435,
+        "recall": 0.503030303030303,
+        "recall_at_fpr5": 0.503030303030303,
+        "actual_fpr_at_fpr5": 0.047657566565554435,
+        "roc_curve_recall_at_fpr5": 0.5272727272727272,
+        "roc_curve_fpr_at_fpr5": 0.04914054600606673,
+        "group_thresholds": {
+          "age_<50": 0.027326925732615432,
+          "age_>=50": 0.06631699992146221
+        },
+        "confusion_matrix": {
+          "tn": 14128,
+          "fp": 707,
+          "fn": 82,
+          "tp": 83
+        }
+      },
+      "fairness_mitigated": {
+        "age_group": {
+          "groups": {
+            "age_<50": {
+              "count": 12211,
+              "positives": 110,
+              "ap": 0.1506,
+              "recall": 0.5364,
+              "fpr": 0.0464
+            },
+            "age_>=50": {
+              "count": 2789,
+              "positives": 55,
+              "ap": 0.1899,
+              "recall": 0.4364,
+              "fpr": 0.0534
+            }
+          },
+          "max_fpr_gap": 0.007,
+          "fpr_ratio": 0.8681,
+          "max_recall_gap": 0.1
+        },
+        "employment_status": {
+          "groups": {
+            "CA": {
+              "count": 11031,
+              "positives": 128,
+              "ap": 0.1798,
+              "recall": 0.5391,
+              "fpr": 0.0544
+            },
+            "CB": {
+              "count": 2061,
+              "positives": 22,
+              "ap": 0.1617,
+              "recall": 0.3182,
+              "fpr": 0.0363
+            },
+            "CC": {
+              "count": 579,
+              "positives": 11,
+              "ap": 0.1835,
+              "recall": 0.6364,
+              "fpr": 0.0475
+            },
+            "CD": {
+              "count": 381,
+              "positives": 1,
+              "ap": 0.0074,
+              "recall": 0.0,
+              "fpr": 0.0105
+            },
+            "CE": {
+              "count": 301,
+              "positives": 2,
+              "ap": 0.0978,
+              "recall": 0.0,
+              "fpr": 0.0067
+            },
+            "CF": {
+              "count": 637,
+              "positives": 1,
+              "ap": 0.0047,
+              "recall": 0.0,
+              "fpr": 0.0094
+            }
+          },
+          "max_fpr_gap": 0.0477,
+          "fpr_ratio": 0.123,
+          "max_recall_gap": 0.6364
+        },
+        "income_band": {
+          "groups": {
+            "high_income": {
+              "count": 7099,
+              "positives": 114,
+              "ap": 0.1925,
+              "recall": 0.5877,
+              "fpr": 0.0703
+            },
+            "low_income": {
+              "count": 4196,
+              "positives": 26,
+              "ap": 0.1396,
+              "recall": 0.3846,
+              "fpr": 0.0233
+            },
+            "mid_income": {
+              "count": 3705,
+              "positives": 25,
+              "ap": 0.0477,
+              "recall": 0.24,
+              "fpr": 0.0323
+            }
+          },
+          "max_fpr_gap": 0.047,
+          "fpr_ratio": 0.3309,
+          "max_recall_gap": 0.3477
+        }
+      }
+    },
+    "top_feature_importances": [
+      {
+        "feature": "current_address_months_count",
+        "importance_raw": 18.0,
+        "importance_pct": 9.09
+      },
+      {
+        "feature": "name_email_similarity",
+        "importance_raw": 17.0,
+        "importance_pct": 8.59
+      },
+      {
+        "feature": "has_other_cards",
+        "importance_raw": 12.0,
+        "importance_pct": 6.06
+      },
+      {
+        "feature": "phone_home_valid",
+        "importance_raw": 11.0,
+        "importance_pct": 5.56
+      },
+      {
+        "feature": "bank_branch_count_8w",
+        "importance_raw": 10.0,
+        "importance_pct": 5.05
+      },
+      {
+        "feature": "device_os",
+        "importance_raw": 9.0,
+        "importance_pct": 4.55
+      },
+      {
+        "feature": "income",
+        "importance_raw": 9.0,
+        "importance_pct": 4.55
+      },
+      {
+        "feature": "customer_age",
+        "importance_raw": 9.0,
+        "importance_pct": 4.55
+      },
+      {
+        "feature": "days_since_request",
+        "importance_raw": 9.0,
+        "importance_pct": 4.55
+      },
+      {
+        "feature": "velocity_4w",
+        "importance_raw": 8.0,
+        "importance_pct": 4.04
+      },
+      {
+        "feature": "date_of_birth_distinct_emails_4w",
+        "importance_raw": 8.0,
+        "importance_pct": 4.04
+      },
+      {
+        "feature": "credit_risk_score",
+        "importance_raw": 8.0,
+        "importance_pct": 4.04
+      },
+      {
+        "feature": "email_is_free",
+        "importance_raw": 8.0,
+        "importance_pct": 4.04
+      },
+      {
+        "feature": "keep_alive_session",
+        "importance_raw": 8.0,
+        "importance_pct": 4.04
+      },
+      {
+        "feature": "device_distinct_emails_8w",
+        "importance_raw": 8.0,
+        "importance_pct": 4.04
+      }
+    ],
+    "hito1_success_verification": {
+      "baseline_cv_ap": 0.149442,
+      "best_cv_ap": 0.179705,
+      "relative_ap_gain": 0.2025,
+      "absolute_ap_gain": 0.030263,
+      "meets_primary_ap_criterion": true,
+      "test_recall_at_fpr5_global_tau": 0.5273,
+      "test_recall_at_fpr5_mitigated_tau": 0.503,
+      "meets_recall_at_fpr5_criterion": true,
+      "age_fpr_gap_unmitigated": 0.0786,
+      "age_fpr_gap_mitigated": 0.007,
+      "meets_fairness_age_gap_criterion": true
+    }
+  },
+  "error_analysis_summary": {
+    "artifact_path": "experiments/error_analysis_hito3.json",
+    "total_errors_audited": 12,
+    "quadrant_profiles": {
+      "TP": {
+        "count": 83,
+        "mean_prob": 0.1815,
+        "mean_customer_age": 40.24,
+        "pct_age_ge50": 28.92,
+        "mean_income": 0.737,
+        "mean_credit_risk_score": 204.92,
+        "mean_proposed_credit_limit": 1062.53,
+        "mean_name_email_similarity": 0.323,
+        "pct_device_os_windows": 78.31,
+        "pct_keep_alive_0": 77.11,
+        "pct_prev_address_missing": 100.0
+      },
+      "FN": {
+        "count": 82,
+        "mean_prob": 0.0165,
+        "mean_customer_age": 39.15,
+        "pct_age_ge50": 37.8,
+        "mean_income": 0.637,
+        "mean_credit_risk_score": 144.89,
+        "mean_proposed_credit_limit": 592.56,
+        "mean_name_email_similarity": 0.436,
+        "pct_device_os_windows": 48.78,
+        "pct_keep_alive_0": 59.76,
+        "pct_prev_address_missing": 90.24
+      },
+      "FP": {
+        "count": 707,
+        "mean_prob": 0.0939,
+        "mean_customer_age": 37.4,
+        "pct_age_ge50": 20.65,
+        "mean_income": 0.705,
+        "mean_credit_risk_score": 183.86,
+        "mean_proposed_credit_limit": 883.28,
+        "mean_name_email_similarity": 0.344,
+        "pct_device_os_windows": 62.09,
+        "pct_keep_alive_0": 71.15,
+        "pct_prev_address_missing": 90.38
+      },
+      "TN": {
+        "count": 14128,
+        "mean_prob": 0.0062,
+        "mean_customer_age": 33.41,
+        "pct_age_ge50": 18.32,
+        "mean_income": 0.553,
+        "mean_credit_risk_score": 128.05,
+        "mean_proposed_credit_limit": 501.49,
+        "mean_name_email_similarity": 0.5,
+        "pct_device_os_windows": 23.62,
+        "pct_keep_alive_0": 39.74,
+        "pct_prev_address_missing": 68.71
+      }
+    }
+  }
+}
