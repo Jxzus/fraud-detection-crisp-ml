@@ -1,7 +1,8 @@
 """Prototipo interactivo en Streamlit para evaluación en vivo (Criterio 9 / Hito 4).
 
 Permite evaluar solicitudes de apertura de cuenta en tiempo real, ajustar dinámicamente el
-umbral de decisión (tau) y auditar el impacto sobre métricas globales y subgrupos.
+umbral de decisión (tau) o activar los umbrales diferenciados por grupo etario calibrados
+en validación (mitigación Hito 3: Delta FPR <= 0.05) y auditar el impacto sobre métricas.
 
 Ejecución:
     streamlit run src/app/streamlit_app.py
@@ -33,19 +34,25 @@ st.caption(
     f"Metodología CRISP-ML(Q) | Ruta C (Aprendizaje Automático) | Dataset BAF (NeurIPS 2022) | seed={SEED}"
 )
 
+flaml_artifact = EXPERIMENTS_DIR / "models" / "flaml_best.joblib"
+baseline_artifact = EXPERIMENTS_DIR / "models" / "baseline_logreg.joblib"
+
 st.sidebar.header("Control Operativo en Vivo")
+use_fairness_thresholds = st.sidebar.checkbox(
+    "Usar umbrales equitativos por edad calibrados en Val (Delta FPR <= 5%)",
+    value=True,
+    help="Aplica el umbral diferenciado por grupo etario (<50 vs >=50) calibrado exclusivamente en validación.",
+)
 decision_threshold = st.sidebar.slider(
-    "Umbral de decisión de fraude (tau)",
+    "Umbral manual global de fraude (tau)",
     min_value=0.01,
     max_value=0.99,
     value=0.50,
     step=0.01,
+    disabled=use_fairness_thresholds,
     help="Ajuste interactivo para evaluar el compromiso entre Recall de fraude y fricción (FPR).",
 )
 st.sidebar.info(f"Política objetivo: FPR <= {OPERATIONAL_MAX_FPR:.0%} | Brecha subgrupos <= 5%")
-
-flaml_artifact = EXPERIMENTS_DIR / "models" / "flaml_best.joblib"
-baseline_artifact = EXPERIMENTS_DIR / "models" / "baseline_logreg.joblib"
 
 col_info, col_live = st.columns([1, 1])
 
@@ -60,7 +67,7 @@ with col_info:
     else:
         st.warning(
             "Aún no se han generado artefactos entrenados. Ejecute primero:\n"
-            "`python -m src.data.download` y `python -m src.models.train --mode baseline`"
+            "`python -m src.data.download` y `python -m src.models.train --mode full`"
         )
 
 with col_live:
@@ -115,6 +122,7 @@ with col_live:
                 }
             ]
         )
+        active_threshold = decision_threshold
         if flaml_artifact.is_file():
             from src.features.preprocessing import replace_negative_sentinels_df
 
@@ -123,6 +131,11 @@ with col_live:
                 bundle["automl"].predict_proba(replace_negative_sentinels_df(sample_record))[0, 1]
             )
             model_label = f"FLAML ({bundle['automl'].best_estimator})"
+            if use_fairness_thresholds and "age_group_thresholds" in bundle:
+                age_key = "age_>=50" if customer_age >= 50 else "age_<50"
+                active_threshold = float(bundle["age_group_thresholds"][age_key])
+            elif use_fairness_thresholds and "threshold" in bundle:
+                active_threshold = float(bundle["threshold"])
         elif baseline_artifact.is_file():
             pipe = joblib.load(baseline_artifact)
             prob = float(pipe.predict_proba(sample_record)[0, 1])
@@ -132,11 +145,19 @@ with col_live:
             model_label = None
 
         if prob is not None:
-            is_fraud = prob >= decision_threshold
-            st.metric(f"Probabilidad estimada ({model_label})", f"{prob:.4f}")
+            is_fraud = prob >= active_threshold
+            st.metric(
+                f"Probabilidad estimada ({model_label})",
+                f"{prob:.4f}",
+                delta=f"Umbral activo tau = {active_threshold:.4f}",
+            )
             if is_fraud:
-                st.error(f"ALERTA DE FRAUDE ACTIVADA (p = {prob:.4f} >= tau = {decision_threshold:.2f})")
+                st.error(
+                    f"ALERTA DE FRAUDE ACTIVADA (p = {prob:.4f} >= tau = {active_threshold:.4f})"
+                )
             else:
-                st.success(f"SOLICITUD APROBADA (p = {prob:.4f} < tau = {decision_threshold:.2f})")
+                st.success(
+                    f"SOLICITUD APROBADA (p = {prob:.4f} < tau = {active_threshold:.4f})"
+                )
         else:
             st.info("Entrene primero la línea base para habilitar la inferencia en tiempo real.")
