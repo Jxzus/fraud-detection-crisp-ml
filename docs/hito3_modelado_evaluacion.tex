@@ -1,0 +1,54 @@
+\documentclass[9pt,letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[margin=1.20cm,top=1.00cm,bottom=1.00cm]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2.0pt}
+\titlespacing*{\section}{0pt}{4.2pt}{1.6pt}
+\titleformat{\section}{\normalfont\fontsize{9.6}{10.6}\bfseries}{\thesection.}{0.4em}{}
+
+\begin{document}
+
+\begin{center}
+    {\large \textbf{Hito 3: Ingeniería de Modelos (CASH + SMOTE In-Fold), Mitigación de Equidad y Análisis de Errores}}\\[1.5pt]
+    {\scriptsize \textbf{Repositorio:} \texttt{fraud-detection-crisp-ml} $|$ \textbf{Ruta C:} Aprendizaje Automático (Russell \& Norvig, caps. 19--21) $|$ \textbf{Semilla:} \texttt{seed=42} $|$ \textbf{Modelo Ganador:} \texttt{FLAML (lgbm)}}
+\end{center}
+\vspace{-5pt}
+\hrule
+\vspace{2.2pt}
+
+\section{Diseño Experimental Fase 3 CRISP-ML(Q): Desbalance In-Fold y Búsqueda CASH (\texttt{--mode full})}
+Sobre la partición estratificada congelada en el Hito 2 (\texttt{Train} $n=70.000$, \texttt{Val} $n=15.000$, \texttt{Test} $n=15.000$; prevalencia $1,103\%$, \texttt{SHA-256: 7bf10a37...dcf9b809}), se ejecutaron tres familias de experimentos libres de \textit{data leakage} y registrados en \textbf{MLflow}: \textbf{(1) Ponderación vs.\ \texttt{SMOTE} in-fold:} Se contrastó la Línea Base (\texttt{LogisticRegression(class\_weight="balanced")}) frente a \texttt{SMOTE(sampling\_strategy=0.1, random\_state=42)} encapsulado en \texttt{imblearn.pipeline.Pipeline} dentro de cada fold de \texttt{StratifiedKFold(n\_splits=5)}, evaluado tanto con Regresión Logística como con \texttt{LightGBM}. \textbf{(2) Búsqueda CASH con FLAML:} Se ejecutó \texttt{AutoML.fit(metric="ap", eval\_method="cv", n\_splits=5, max\_iter=30, seed=42)} sobre \texttt{lgbm}, \texttt{xgboost}, \texttt{rf}, \texttt{extra\_tree} y \texttt{lrl1}. El estimador ganador fue \textbf{\texttt{lgbm}} (\texttt{n\_estimators=66}, \texttt{num\_leaves=4}, \texttt{min\_child\_samples=14}, \texttt{lr=0,1292}, \texttt{colsample\_bytree=0,8872}), alcanzando \textbf{$\text{AUC-PR}_{\text{CV}} = 0,1797$} (\textbf{$+20,25\%$ relativo} y $+0,0303$ abs.\ sobre la línea base $0,1494$, superando la meta $\ge +15\%$). \textbf{(3) Hallazgo sobre \texttt{SMOTE}:} En 57 dimensiones post-\texttt{OneHotEncoder}, interpolar con \texttt{SMOTE(0.1)} deteriora el desempeño de árboles potenciados ($\text{AUC-PR}_{\text{CV}}=0,1562$ con \texttt{SMOTE} vs.\ $0,1797$ sin \texttt{SMOTE}) al generar puntos sintéticos en regiones de solapamiento.
+
+\section{Resultados Comparativos en 5-Fold CV y Test ($n=15.000$) y Verificación de Metas del Hito 1}
+\vspace{1pt}
+{\scriptsize
+\begin{tabularx}{\textwidth}{@{}l c c c c c X@{}}
+\toprule
+\textbf{Modelo / Estrategia Evaluada} & \textbf{5-Fold CV AUC-PR} & \textbf{Test AUC-PR} & \textbf{Recall@FPR$\le$5\%} & \textbf{Test FPR} & \textbf{Test F1} & \textbf{ROC-AUC $|$ Equidad Etaria ($\Delta\text{FPR}$)} \\
+\midrule
+\textbf{1. Baseline LogReg (\texttt{balanced}, $\hat{\tau}_{\text{val}}=0,8173$)} & $0,1494 \pm 0,0360$ & $0,1413$ & $0,4970$ ($82/165$) & $0,0495$ & $0,1672$ & $0,8805$ $|$ $\Delta\text{FPR}=0,0927$ (incumple) \\
+\textbf{2. LogReg + \texttt{SMOTE} in-fold ($0,1$, $\hat{\tau}_{\text{val}}=0,2956$)} & $0,1575 \pm 0,0346$ & $0,1421$ & $0,5394$ ($89/165$) & $0,0502$ & $0,1784$ & $0,8847$ $|$ $\Delta\text{FPR}=0,0811$ (incumple) \\
+\textbf{3. LGBM + \texttt{SMOTE} in-fold ($0,1$, $\hat{\tau}_{\text{val}}=0,0506$)} & $0,1562 \pm 0,0315$ & $0,1537$ & $0,5273$ ($87/165$) & $0,0457$ & $0,1871$ & $0,8902$ $|$ $\Delta\text{FPR}=0,0718$ (incumple) \\
+\textbf{4. FLAML \texttt{lgbm} --- Umbral Único ($\hat{\tau}_{\text{val}}=0,0355$)} & $\mathbf{0,1797}$ ($0,1743\pm 0,0517$) & $\mathbf{0,1556}$ & $\mathbf{0,5273}$ ($87/165$) & $0,0496$ & $0,1761$ & $0,8887$ $|$ $\Delta\text{FPR}=0,0786$ (incumple) \\
+\textbf{5. FLAML \texttt{lgbm} + Equidad por Edad en Val} & $\mathbf{0,1797}$ ($\mathbf{+20,25\%}$) & $\mathbf{0,1556}$ & $\mathbf{0,5030}$ ($\mathbf{83/165}$) & $\mathbf{0,0477}$ & $\mathbf{0,1738}$ & $\mathbf{0,8887}$ $|$ $\mathbf{\Delta\text{FPR}=0,0070}$ (\textbf{cumple $\le 0,05$}) \\
+\bottomrule
+\end{tabularx}
+}
+
+\section{Mitigación Post-Procesamiento de Sesgo Demográfico sin \textit{Data Leakage} ($\Delta\text{FPR} = 0,0070 \le 0,05$)}
+Dado que en BAF el grupo \texttt{age\_>=50} presenta una tasa basal de fraude $2,83\times$ superior ($2,34\%$ vs.\ $0,83\%$), un umbral global único ($\hat{\tau}_{\text{val}}=0,0355$) produce en \texttt{Test} $\text{FPR}(\texttt{age\_<50})=3,51\%$ frente a $\text{FPR}(\texttt{age\_>=50})=11,38\%$ ($\Delta\text{FPR}=0,0786 > 0,05$). Para corregirlo sin tocar \texttt{Test}, se resolvió \textbf{exclusivamente sobre \texttt{Val}} el problema con restricciones $\max_{\tau_{<50},\tau_{\ge 50}} \text{Recall}_{\text{val}}$ sujeto a $\text{FPR}_{\text{val}}\le 5\%$ y $|\text{FPR}_{\text{val}}^{<50}-\text{FPR}_{\text{val}}^{\ge 50}|\le 0,03$ (\texttt{calibrate\_age\_group\_thresholds\_val}), obteniendo $\hat{\tau}_{\text{val}}(\texttt{age\_<50})=0,0273$ y $\hat{\tau}_{\text{val}}(\texttt{age\_>=50})=0,0663$. Al evaluarlos en \texttt{Test}, los falsos positivos se equilibran en \textbf{$4,64\%$ (\texttt{age\_<50})} y \textbf{$5,34\%$ (\texttt{age\_>=50})}, reduciendo la brecha en \textbf{$-91,1\%$ hasta $\Delta\text{FPR}=0,0070 \le 0,05$} ($\text{ratio}=0,8681$), reduciendo también las brechas en empleo ($0,1058\to 0,0477$) e ingreso ($0,0481\to 0,0470$) y preservando \textbf{$\text{Recall@FPR}\le 5\% = 50,30\% \ge 50\%$} con $\text{FPR}_{\text{global}}=4,77\% \le 5\%$ ($\text{TN}=14.128, \text{FP}=707, \text{FN}=82, \text{TP}=83$).
+
+\section{Análisis Causal de 12 Errores Reales en Test (\texttt{experiments/error\_analysis\_hito3.json}) y Reflexión IA}
+Las variables de mayor importancia en \texttt{FLAML (lgbm)} son \texttt{current\_address\_months\_count} ($9,09\%$), \texttt{name\_email\_similarity} ($8,59\%$), \texttt{has\_other\_cards} ($6,06\%$), \texttt{phone\_home\_valid} ($5,56\%$) y \texttt{bank\_branch\_count\_8w} ($5,05\%$). La auditoría de 12 casos reales extremos en \texttt{Test} ($6$ \texttt{FP} + $6$ \texttt{FN}) identifica dos modos de fallo: \textbf{(a) Falsos Positivos ($n=707$, $\bar{p}=0,0939$):} Clientes legítimos con cupo solicitado elevado ($\bar{x}=883,3$ vs.\ $501,5$ en \texttt{TN}; $2.000$ en \texttt{FP\_01\_test\_idx\_7075} con $\hat{p}=0,7846$ y \texttt{FP\_02\_test\_idx\_4330} con $\hat{p}=0,7058$), uso de \texttt{device\_os=windows} ($62,09\%$ vs.\ $23,62\%$ en \texttt{TN}), \texttt{keep\_alive\_session=0} ($71,15\%$) y baja similitud nombre-correo ($0,04\text{--}0,08$). \textbf{(b) Falsos Negativos ($n=82$, $\bar{p}=0,0165$):} Fraudes ``camaleón'' que piden el cupo mínimo ($200$ en \texttt{FN\_01\_test\_idx\_7589} con $\hat{p}=0,0017$ y \texttt{FN\_02\_test\_idx\_2279} con $\hat{p}=0,0024$; media $592,6$ vs.\ $1.062,5$ en \texttt{TP}), operan desde \texttt{linux}/\texttt{other}, activan \texttt{keep\_alive\_session=1} y fabrican correos similares al nombre ($0,73\text{--}0,83$). \textbf{(c) Reflexión crítica IA:} La verificación empírica del equipo detectó y corrigió tres limitaciones de sugerencias estándar de IA: \textit{threshold snooping} en \texttt{Test}, degradación por \texttt{SMOTE} en GBDT e incumplimiento de equidad bajo umbral único.
+
+\end{document}
